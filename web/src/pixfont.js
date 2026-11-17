@@ -39,3 +39,26 @@ export function boardCanvas(font, coins) {
   }
   return c;
 }
+
+/** plovoucí částka u pokladny: mince + číslo, tmavý obrys (bez cedule a sloupků) */
+export function floatCanvas(font, coins) {
+  const num = coins.toLocaleString('en-US');
+  const tw = [...num].reduce((a, ch) => a + ((font[ch] || font[' '])[0].length + 1), 0) - 1;
+  const W = tw + 6 + 4, H = 9;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const ctx = c.getContext('2d');
+  const draw = (ox, oy, col, glyphOnly) => {
+    let x = 8 + ox;
+    for (const ch of num) {
+      const gl = font[ch] || font[' '];
+      gl.forEach((row, yy) => [...row].forEach((v, xx) => { if (v === '1') { ctx.fillStyle = col; ctx.fillRect(x + xx, 2 + yy + oy, 1, 1); } }));
+      x += gl[0].length + 1;
+    }
+  };
+  for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [1, 1], [-1, -1], [1, -1], [-1, 1]]) draw(dx, dy, '#3d2a30');
+  // obrys mince
+  ctx.fillStyle = '#3d2a30'; ctx.fillRect(0, 1, 7, 7); ctx.fillRect(1, 0, 5, 9);
+  ctx.drawImage(coinCanvas(1), 1, 2);
+  draw(0, 0, '#ffd23c');
+  return c;
+}

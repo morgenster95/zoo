@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { slotTable, slotPos, regionFor, isWalk, ringOf, GATE_J, lotBox, inRegion } from './layout.js';
+import { slotTable, slotPos, regionFor, isWalk, isRoad, ringOf, GATE_J, lotBox, inRegion } from './layout.js';
 import { emptyState, addVisitor, balance, lookOf, normHandle } from './state.js';
 import { publicData } from './export.js';
 import { hashString, rngFor } from './rng.js';
@@ -46,6 +46,8 @@ test('každé obsazené místo leží v otevřené oblasti', () => {
 test('mince: 10 za návštěvníka minus utraceno', () => {
   const s = emptyState();
   for (let k = 0; k < 12; k++) addVisitor(s, 'user' + k);
+  assert.equal(balance(s), 620);               // 500 počáteční fond + 12 × 10
+  s.start = 0;
   assert.equal(balance(s), 120);
   s.spent = 50;
   assert.equal(balance(s), 70);
@@ -77,7 +79,7 @@ test('parcela má okraje uvnitř bloku', () => {
 import { CATALOG } from './catalog.js';
 import { openVote, castVote, resolveVote, tally, freePlots, ensurePlots } from './vote.js';
 
-function zooWith(n) { const s = emptyState(); for (let k = 0; k < n; k++) addVisitor(s, 'v' + k); return s; }
+function zooWith(n) { const s = emptyState(); s.start = 0; for (let k = 0; k < n; k++) addVisitor(s, 'v' + k); return s; }
 
 test('hlasování: nabídne se jen to, na co jsou mince', () => {
   const s = zooWith(12);                       // 120 mincí
@@ -139,4 +141,28 @@ test('vylepšení vstupu se zaplatí, ale nezabere parcelu', () => {
   assert.equal(r.lot, null);
   assert.ok(freePlots(s).length >= plotsBefore);
   assert.equal(balance(s), 2000 - 1500);
+});
+
+import { placeLot, fenceOf, ANIMAL_MARGIN, ANIMAL_GAP } from './place.js';
+import { START_LOTS, lotBox as lb } from './layout.js';
+
+test('zvířata zůstávají uvnitř plotu s odstupem, daleko od sebe a od domku, nikdy na silnici', () => {
+  const widths = { bp_lodge: 58, bp_barn: 60 };
+  for (const lot of [START_LOTS['-1,-1'], { t: 'paddock', animals: ['elephant', 'elephant', 'zebra', 'lion'] }, { t: 'paddock', animals: ['elephant', 'elephant'], house: 'bp_barn' }, { t: 'paddock', animals: ['monkey', 'monkey', 'monkey'], house: 'bp_lodge' }, START_LOTS['0,-1']]) {
+    for (const [a, b] of [[-1, -1], [0, -1], [2, 3], [-4, -2]]) {
+      const key = `${a},${b}`, r = placeLot(a, b, lot, key, (n) => widths[n] || 0);
+      const f = fenceOf(a, b), animals = r.items.filter((x) => x.role === 'animal');
+      for (const an of animals) {
+        assert.ok(an.i >= f.i0 + (lot.t === 'pond' ? 0.4 : ANIMAL_MARGIN) - 1e-9 && an.i <= f.i1 - 0.4, `i uvnitř ${key}`);
+        assert.ok(an.j >= f.j0 + 0.4 && an.j <= f.j1 - 0.4, `j uvnitř ${key}`);
+        assert.ok(!isRoad(Math.floor(an.i), Math.floor(an.j)), 'zvíře na silnici');
+      }
+      for (let p = 0; p < animals.length; p++) for (let q = p + 1; q < animals.length; q++) assert.ok(Math.hypot(animals[p].i - animals[q].i, animals[p].j - animals[q].j) >= 0.9, 'zvířata se překrývají');
+    }
+  }
+});
+
+test('parcela bez obsahu je volná louka; plot má cedulku', () => {
+  assert.equal(placeLot(0, 0, undefined, '0,0').free, true);
+  assert.ok(placeLot(0, 0, { t: 'plot', id: 1 }, '0,0').items.some((x) => x.role === 'sign'));
 });

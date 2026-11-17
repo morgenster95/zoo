@@ -1,6 +1,6 @@
 // Stav hry: návštěvníci, utracené mince, obsah parcel. Databáze je soubor (data/state.json), ručně se neupravuje.
 import { hashString } from './rng.js';
-import { LOOKS, COIN_PER_VISITOR, START_LOTS } from './layout.js';
+import { LOOKS, COIN_PER_VISITOR, START_COINS, START_LOTS } from './layout.js';
 
 export const SHARDS = 256;        // počet souborů pro hledání @handle
 export const LOOK_CHUNK = 4096;   // kolik vzhledů v jednom souboru
@@ -11,7 +11,7 @@ export const lookOf = (handle) => hashString('look:' + handle) % LOOKS;
 export const shardOf = (handle) => hashString(handle) % SHARDS;
 
 export function emptyState() {
-  return { theme: 'zoo', day: 1, visitors: [], spent: 0, lots: JSON.parse(JSON.stringify(START_LOTS)), vote: null, history: [], updated: null };
+  return { theme: 'zoo', day: 1, start: START_COINS, visitors: [], spent: 0, lots: JSON.parse(JSON.stringify(START_LOTS)), vote: null, history: [], updated: null };
 }
 
 /** přidá návštěvníka (jen jednou na účet); vrací jeho index nebo -1 */
@@ -26,4 +26,4 @@ export function addVisitor(state, rawHandle, day = state.day) {
 }
 
 export const coinsEarned = (n) => n * COIN_PER_VISITOR;
-export const balance = (state) => coinsEarned(state.visitors.length) - (state.spent || 0);
+export const balance = (state) => (state.start ?? START_COINS) + coinsEarned(state.visitors.length) - (state.spent || 0);

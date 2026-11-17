@@ -16,7 +16,7 @@ za.FONT.update({
  'J': ['001','001','001','101','010'], 'K': ['101','101','110','101','101'], 'L': ['100','100','100','100','111'],
  'M': ['101','111','111','101','101'], 'N': ['110','101','101','101','101'], 'P': ['110','101','110','100','100'],
  'U': ['101','101','101','101','111'], 'W': ['101','101','111','111','101'], 'X': ['101','101','010','101','101'],
- '?': ['111','001','011','000','010'], '!': ['010','010','010','000','010'], '+': ['000','010','111','010','000'],
+ '?': ['111','001','011','000','010'], '-': ['000','000','111','000','000'], '=': ['000','111','000','111','000'], "'": ['010','010','000','000','000'], '.': ['0','0','0','0','1'], 'Q': ['111','101','101','111','001'], '!': ['010','010','010','000','010'], '+': ['000','010','111','010','000'],
 })
 
 def text_w(s, sc=1): return sum((len(za.FONT.get(c, za.FONT[' '])[0]) + 1) * sc for c in s) - sc
@@ -314,6 +314,56 @@ def gate_poor():
         x = 7 + k * 9
         g.polygon([(x, 21), (x + 7, 21), (x + 3, 26)], fill=col)
     return outlined(im, hx('#4a2f20')), (29, 54)
+
+def gate_post():
+    im, g = new(7, 30)
+    g.rectangle([1, 3, 5, 27], fill=hx('#b8884e')); g.rectangle([4, 3, 5, 27], fill=hx('#8a5a32')); g.rectangle([1, 3, 2, 27], fill=hx('#d2a468'))
+    g.rectangle([0, 1, 6, 4], fill=hx('#d9b57a')); g.rectangle([0, 4, 6, 4], fill=hx('#9c6840'))
+    return outlined(im, hx('#4a2f20')), (4, 29)
+
+def gate_beam():
+    """šikmý trám podél osy i (dolů doprava, 2 dílky = 32×16 px) s nápisem ZOO a vlaječkami; kotva = levý horní konec"""
+    L = 32
+    flat = Image.new('RGBA', (L + 2, 12), (0, 0, 0, 0)); fg = ImageDraw.Draw(flat)
+    fg.rectangle([0, 0, L, 10], fill=hx('#c98a52')); fg.rectangle([0, 0, L, 1], fill=hx('#e0a468')); fg.rectangle([0, 9, L, 10], fill=hx('#8a5a32'))
+    gl = {'Z': ['111', '001', '010', '100', '111'], 'O': ['111', '101', '101', '101', '111']}
+    x = 5
+    for ch in 'ZOO':
+        for yy, row in enumerate(gl[ch]):
+            for xx, c in enumerate(row):
+                if c == '1': fg.rectangle([x + xx * 2, 3 + yy, x + xx * 2 + 1, 3 + yy], fill=hx('#fff3d6'))
+        x += 8
+    out = Image.new('RGBA', (L + 4, L // 2 + 12 + 10), (0, 0, 0, 0))
+    fp = flat.load(); op = out.load()
+    for xx in range(flat.width):
+        shift = xx // 2
+        for yy in range(flat.height):
+            if fp[xx, yy][3] and 0 <= yy + shift + 1 < out.height: op[xx + 1, yy + shift + 1] = fp[xx, yy]
+    # vlaječky pod trámem
+    for k, col in enumerate([hx('#ef5b5b'), hx('#ffc93c'), hx('#4aa8dc'), hx('#ef5b5b')]):
+        x0 = 4 + k * 8; y0 = 11 + x0 // 2 + 1
+        for yy in range(5):
+            for xx in range(max(1, 6 - yy * 2)):
+                if 0 <= y0 + yy < out.height: op[x0 + xx + 1, y0 + yy] = col
+    return outlined(out, hx('#4a2f20')), (1, 1)
+
+def school_bus():
+    """žlutý školní autobus jedoucí podél osy j (doprava nahoru); kotva = střed základny dole"""
+    im, g = new(52, 44)
+    A = (34, 15)
+    A_, B, C, D = box(g, A, 0.55, 1.75, 9, hx('#e0a820'), hx('#ffd23c'), hx('#ffe27a'), edge=hx('#a8761a'))
+    L = int(B[0] - C[0])
+    # okna a pruh na dlouhé stěně (B→C)
+    for k in range(5):
+        wall_rect(g, C, B, (3 + k * 5) / L if L else 0, 3, 4, 3, hx('#7fb8e8'))
+    wall_rect(g, C, B, 0, L, 2, 1, hx('#3a2a32'))
+    # kola
+    for fx in (0.2, 0.8):
+        x = int(C[0] + (B[0] - C[0]) * fx); y = int(C[1] + (B[1] - C[1]) * fx)
+        g.ellipse([x - 2, y - 1, x + 2, y + 3], fill=hx('#2a2430'))
+    # červený stop znak
+    g.rectangle([int(C[0]) - 3, int(C[1]) - 6, int(C[0]) - 1, int(C[1]) - 4], fill=hx('#ef5b5b'))
+    return outlined(im, hx('#4a2f20')), (int(C[0] + (B[0] - C[0]) / 2) + 1, int(C[1] + (B[1] - C[1]) / 2) + 2)
 
 # ---------------------------------------------------------------- mini zoo
 def make_mini(n_visitors=12, W=420, H=262):

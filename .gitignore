@@ -7,3 +7,9 @@ __pycache__/
 web/public/data/
 data/state.fake.json
 *.log
+marketing/reels/*/stills/
+marketing/reels/*/tmp/
+marketing/reels/*/preview.mp4
+web/public/reels/
+ScreenRecording_*.mp4
+marketing/reels/*/*.mp4

@@ -1,9 +1,10 @@
 // ZOO: prohlížeč zoo (PixiJS). Mapa je izometrická, vše se počítá z dat v /data (zoo.json, looks/*.bin, h/*.json, v/*.json).
 import { Application, Assets, Sprite, Texture, Container, Rectangle, Graphics } from 'pixi.js';
 import { slotPos, regionFor, lotBox, lotsIn, lotKey, isPlaza, isRoad, BLOCK, GATE_J, inRegion, COIN_PER_VISITOR } from '../../engine/layout.js';
+import { placeLot } from '../../engine/place.js';
 import { rngFor, hashString } from '../../engine/rng.js';
 import { shardOf, normHandle } from '../../engine/state.js';
-import { textCanvas, coinCanvas, boardCanvas } from './pixfont.js';
+import { textCanvas, coinCanvas, floatCanvas } from './pixfont.js';
 
 const DATA = import.meta.env.VITE_DATA_BASE || '/data';
 const ASSETS = '/assets';
@@ -113,46 +114,22 @@ const TREES = ['oak1', 'oak2', 'oak3', 'pine1', 'birch'];
 const SMALL = ['bush1', 'bush2', 'flowers', 'tuft', 'flowers', 'tuft'];
 function pickDecor(rng) { return rng() < 0.3 ? TREES[Math.floor(rng() * TREES.length)] : SMALL[Math.floor(rng() * SMALL.length)]; }
 
-// Pravidlo umístění: sprite budovy má kotvu ve spodním (předním) rohu základny. Střed základny leží o půl diagonály výš,
-// takže přední roh dáme do (střed + w/64, střed + w/64) (w = šířka spritu v px; diamant široký w px je vysoký w/2 px = w/32 dílků i+j).
-const fpOff = (name) => Math.min(1.1, (propTex[name]?.m.w || 48) / 64);
-function placeCentered(name, ci, cj, z = 1, dx = 0, dy = 0) { const o = fpOff(name); return prop(name, ci + o + dx, cj + o + dy, z); }
-
 const DEBUG = new URLSearchParams(location.search).get('debug') === 'lots';
 function buildLots() {
   for (const { a, b } of lotsIn(R)) {
     const key = lotKey(a, b), lot = lots[key], bx = lotBox(a, b), rng = rngFor('lot', key);
-    const ci = bx.ci, cj = bx.cj;
     if (DEBUG) {
       const g = new Graphics();
       const P = (i, j) => [sx(i, j), sy(i, j)];
       g.poly([...P(bx.i0, bx.j0), ...P(bx.i1 + 1, bx.j0), ...P(bx.i1 + 1, bx.j1 + 1), ...P(bx.i0, bx.j1 + 1)]).stroke({ width: 1, color: 0xff00ff });
-      g.circle(...P(ci, cj), 2).fill(0xff0000);
+      g.circle(...P(bx.ci, bx.cj), 2).fill(0xff0000);
       overlay.addChild(g);
     }
-    if (lot && (lot.t === 'paddock' || lot.t === 'pond')) {
-      // plot 4×4 vystředěný v bloku 5×5 (po 0,5 dílku od silnic)
-      fenceRect(bx.i0 + 0.5, bx.j0 + 0.5, bx.i1 + 0.5, bx.j1 + 0.5);
-      if (lot.t === 'pond') { prop('reeds', ci - 1.5, cj + 1.3, 3); prop('reeds', ci + 1.5, cj - 1.2, 1); }
-      const house = lot.house && propTex[lot.house] ? lot.house : null;
-      if (house) placeCentered(house, ci - 0.8, cj - 0.8, 1);                 // domek vzadu, zvířata před ním
-      (lot.animals || []).forEach((an, k) => {
-        const n = (lot.animals || []).length, t = n > 1 ? k / (n - 1) : 0.5;
-        const p = lot.t === 'pond' ? [ci - 0.6 + k * 1.0, cj - 0.3 + k * 0.8]
-          : house ? [ci + 0.2 + t * 1.0 + rng() * 0.2, ci - cj + cj + 0.3 + (1 - t) * 1.0 + rng() * 0.2]
-          : [bx.i0 + 1.0 + rng() * (bx.i1 - bx.i0 - 1.5), bx.j0 + 1.0 + rng() * (bx.j1 - bx.j0 - 1.5)];
-        const sp = prop('a_' + an, p[0], p[1], 2);
-        if (rng() < 0.5) sp.scale.x = -1;
-      });
-    } else if (lot && lot.t === 'plot') {
-      prop('plot', ci + 1, cj + 1, 0);               // diamant 2×2 dílky, přední roh o 1 dílek od středu
-      prop('q_sign', ci - 1.9, cj + 1.0, 4);
-    } else if (lot && lot.t === 'build' && propTex[lot.sprite]) {
-      placeCentered(lot.sprite, ci, cj, 1);
-      const spots = [[1.5, 0.0], [0.0, 1.5], [1.4, 1.4], [1.9, 0.7], [0.7, 1.9]];
-      (lot.animals || []).forEach((an, k) => { const o = spots[k % spots.length]; const sp = prop('a_' + an, ci + o[0], cj + o[1], 3); if (k % 2) sp.scale.x = -1; });
-    } else {
-      // volná louka: pár stromů, keřů a plevele (hustota klesá s růstem zoo)
+    const r = placeLot(a, b, lot, key, (n) => propTex[n]?.m.w || 0);   // polohy počítá engine (testované: zvířata uvnitř plotu, bez překryvů)
+    if (r.fence) fenceRect(r.fence.i0, r.fence.j0, r.fence.i1, r.fence.j1);
+    r.items.forEach((it) => { if (!propTex[it.name]) return; const sp = prop(it.name, it.i, it.j, it.z); if (it.flip) sp.scale.x = -1; });
+    if (r.free || !lot) {
+      // volná louka: pár stromů, keřů a plevele
       const n = 3 + Math.floor(rng() * 3);
       for (let k = 0; k < n; k++) {
         const i = bx.i0 + 0.5 + rng() * (bx.i1 - bx.i0 - 1), j = bx.j0 + 0.5 + rng() * (bx.j1 - bx.j0 - 1);
@@ -173,24 +150,32 @@ function buildBorder() {
   }
 }
 
-let board, boardSprite;
+let boardSprite, boardBase = { x: 0, y: 0 };
 function buildEntrance() {
   const up = zoo.upgrades || {};
-  if (up.gate && propTex[up.gate]) prop(up.gate, 0.5, GATE_J + 1.3, 6); else prop('gate', 0.5, GATE_J + 0.9, 6);
+  if (up.gate && propTex[up.gate]) prop(up.gate, 0.5, GATE_J + 1.3, 6);
+  else {                                         // chudá brána v ose cesty: dva sloupky přes silnici a šikmý trám s nápisem
+    const gj = GATE_J + 0.9;
+    prop('gate_post', -0.5, gj, 6); prop('gate_post', 1.5, gj, 6);
+    const beam = prop('gate_beam', -0.5, gj, 7, 0, -29);
+    beam.anchor.set(1 / propTex.gate_beam.m.w, 1 / propTex.gate_beam.m.h);
+  }
   prop('sign_welcome', -2.6, GATE_J + 1.6, 4);
   prop('crate', -3.2, GATE_J + 0.9, 1); prop('crate', -2.8, GATE_J + 1.2, 1); prop('hay', -4.4, GATE_J + 0.5, 1);
   const KI = 4.2, KJ = GATE_J + 1.7;                       // pokladna stojí vedle cesty, ne na ní
   const k = prop(up.kasa && propTex[up.kasa] ? up.kasa : 'kasa', KI, KJ, 2);
+  // částka se jen vznáší nad pokladnou (bez cedule); houpe se v ticker smyčce
   boardSprite = new Sprite(); boardSprite.anchor.set(0.5, 1);
-  boardSprite.position.set(Math.round(sx(KI, KJ)) - 1, Math.round(sy(KI, KJ)) - k.height + 24);
-  boardSprite.zIndex = (KI + KJ) * 10 + 3;
+  boardBase = { x: Math.round(sx(KI, KJ)), y: Math.round(sy(KI, KJ)) - k.height + 7 };
+  boardSprite.position.set(boardBase.x, boardBase.y);
+  boardSprite.zIndex = 99999;
   objects.addChild(boardSprite);
   setBoard(zoo.coins);
   prop('d_bench_wood', -1.8, 1.5, 1); prop('d_bench_green', 2.0, 1.5, 1); prop('d_lamp', -1.5, -1.5, 1); prop('d_lamp', 2.5, -1.4, 1); prop('d_bin', 2.6, 0.9, 1);
   prop('tuft', 2.0, 3.0, 1); prop('flowers', -4.1, 5.3, 1); prop('tuft', 4.4, 5.2, 1); prop('pine1', -5.6, 4.8, 1);
 }
 function setBoard(coins) {
-  const t = Texture.from(boardCanvas(font, coins)); t.source.scaleMode = 'nearest';
+  const t = Texture.from(floatCanvas(font, coins)); t.source.scaleMode = 'nearest';
   boardSprite.texture = t;
 }
 
@@ -354,6 +339,7 @@ app.ticker.add(() => {
     marker.visible = true;
     marker.position.set(s.position.x, s.position.y - 14 - Math.abs(Math.sin(t * 4)) * 2);
   }
+  if (boardSprite) boardSprite.y = boardBase.y - 2 - Math.round(Math.sin(t * 2.2) * 1.5);
   frames++;
   if (performance.now() - last > 1000) { $('fps').textContent = `${frames} fps · ${N} visitors · r${R} · upd ${updMs.toFixed(1)} ms`; frames = 0; last = performance.now(); }
 });

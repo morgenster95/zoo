@@ -72,6 +72,8 @@ body, (ax, ay) = za.house(1.2, 1.0, 14, 8, hx('#c9a36b'), hx('#b8503a'), windows
 bb = body.getbbox(); body = body.crop((0, bb[1], body.width, body.height)); ay -= bb[1]
 body = za.outlined(body, hx('#3d2a28')); add('kasa', body, (ax + 1, ay + 1))
 add('post0', mz.rough_fence_post(0)); add('post1', mz.rough_fence_post(1))
+for n, fn in [('gate_post', mz.gate_post), ('gate_beam', mz.gate_beam), ('bus', mz.school_bus)]:
+    im, a = fn(); add(n, im, a)
 from PIL import ImageDraw
 for name, dx in (('seg_i', 16), ('seg_j', -16)):
     im = Image.new('RGBA', (40, 30), (0, 0, 0, 0)); g = ImageDraw.Draw(im)

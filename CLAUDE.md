@@ -20,3 +20,8 @@ Další kroky: Instagram (follower count → návštěvníci, komentář = přev
 ## Umístění staveb na mapě (pravidlo)
 Sprite má kotvu v předním rohu základny. Aby stál ve středu parcely (`ci, cj`), dáváme přední roh do `střed + w/64` na obou osách (`placeCentered` v `web/src/main.js`, w = šířka spritu). Plot výběhu je 4×4 dílky vystředěný v bloku 5×5 (po 0,5 dílku od silnic). Domek výběhu stojí vzadu (`střed − 0,8`), zvířata před ním. Pokladna stojí vedle cesty (`KI 4,2; KJ GATE_J+1,7`).
 Ladění: `http://localhost:5173/?debug=lots` vykreslí hranice parcel a středy.
+
+## Reely (viz docs/REEL.md)
+Reel se natáčí v enginu: `web/reel.html` + `web/src/reel.js` kreslí snímek podle času (`window.__reel.setTime(t)`), plán a časování jsou v `web/src/reel-script.js`, hlas/hudba/efekty v `tools/reel-audio.py`, nahrávání `tools/record-reel.mjs` (puppeteer-core + ffmpeg). Vzorové video je ve složce projektu (`ScreenRecording_*.mp4`, není v gitu).
+Pravidlo hry z reelu: start = 500 mincí (`START_COINS`), 1 follower = 10 mincí, plot stojí 200, sdílení = +20 mincí (autobus).
+Pozor: ve videu dělat bránu a zvířata jako ve hře (`engine/place.js`), nic nekreslit zvlášť.

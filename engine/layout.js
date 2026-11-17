@@ -7,6 +7,7 @@ export const BLOCK = 6;
 export const GATE_J = 6;
 export const LOOKS = 256;
 export const COIN_PER_VISITOR = 10;
+export const START_COINS = 500;   // počáteční fond (rozhodnutí 17. 11. 2026, podle vzorového videa); mění se jednou konstantou
 export const R_MAX = 16;           // největší připravený prstenec (≈ 30 000 míst); dál je potřeba rozšířit
 export const CAP_ROAD = 5;         // návštěvníků na dlaždici silnice
 export const CAP_PLAZA = 8;        // návštěvníků na dlaždici náměstí
