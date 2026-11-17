@@ -110,7 +110,7 @@ function fenceRect(i0, j0, i1, j1, gaps = []) {
   for (let j = j0 + 1; j < j1; j++) for (const i of [i0, i1]) prop('post' + ((i + j) & 1), i, j, 3);
 }
 
-const TREES = ['oak1', 'oak2', 'oak3', 'pine1', 'birch'];
+const TREES = ['oak1', 'oak2', 'oak3', 'pine1', 'pine2', 'birch'];
 const SMALL = ['bush1', 'bush2', 'flowers', 'tuft', 'flowers', 'tuft'];
 function pickDecor(rng) { return rng() < 0.3 ? TREES[Math.floor(rng() * TREES.length)] : SMALL[Math.floor(rng() * SMALL.length)]; }
 
@@ -163,7 +163,7 @@ function buildEntrance() {
   prop('sign_welcome', -2.6, GATE_J + 1.6, 4);
   prop('crate', -3.2, GATE_J + 0.9, 1); prop('crate', -2.8, GATE_J + 1.2, 1); prop('hay', -4.4, GATE_J + 0.5, 1);
   const KI = 4.2, KJ = GATE_J + 1.7;                       // pokladna stojí vedle cesty, ne na ní
-  const k = prop(up.kasa && propTex[up.kasa] ? up.kasa : 'kasa', KI, KJ, 2);
+  const k = prop(up.kasa && propTex[up.kasa] ? up.kasa : 'bp_ticket', KI, KJ, 2);
   // částka se jen vznáší nad pokladnou (bez cedule); houpe se v ticker smyčce
   boardSprite = new Sprite(); boardSprite.anchor.set(0.5, 1);
   boardBase = { x: Math.round(sx(KI, KJ)), y: Math.round(sy(KI, KJ)) - k.height + 7 };

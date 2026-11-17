@@ -80,7 +80,7 @@ export function regionFor(n) {
 
 /** výchozí obsah parcel (absolutně malá a chudá zoo) */
 export const START_LOTS = {
-  '-1,-1': { t: 'paddock', animals: ['zebra', 'zebra'] },
+  '-1,-1': { t: 'paddock', animals: ['alpaca', 'alpaca'] },
   '0,-1': { t: 'pond', animals: ['flamingo', 'flamingo'] },
   '-1,0': { t: 'plot', id: 1 },
   '0,0': { t: 'plot', id: 2 },

@@ -57,12 +57,14 @@ def add(name, im, anchor=None):
 
 for n, f in animals.ANIMALS: add('old_a_' + n, f())      # moje původní (záloha), v mapě jsou sprity z PixelLabu
 PL = os.path.join(HERE, '..', 'pixellab', 'sprites')
+TREES_SH = {'oak1', 'oak2', 'oak3', 'pine1', 'pine2', 'birch', 'cherry', 'palm', 'bamboo', 'acacia'}
 if os.path.isdir(PL):
     for fn in sorted(os.listdir(PL)):
         if not fn.endswith('.png'): continue
         im = Image.open(os.path.join(PL, fn)).convert('RGBA'); nm = fn[:-4]
-        add(nm, im, (im.width // 2, im.height - (3 if nm.startswith('a_') else 5 if nm.startswith('bp_') else 2)))
+        add(nm, im, (im.width // 2, im.height - (3 if nm.startswith('a_') or nm in TREES_SH else 5 if nm.startswith('bp_') else 2)))
 for n, f in veg.ALL:
+    if os.path.exists(os.path.join(HERE, '..', 'pixellab', 'sprites', n + '.png')): continue       # chunky verze z PixelLabu má přednost
     im = f()
     add(n, im, (im.width // 2, im.height - 4 if n not in ('flowers', 'tuft', 'bush1', 'bush2', 'reeds') else im.height - 2))
 for n, fn in [('gate', mz.gate_poor), ('bench', mz.bench), ('crate', mz.crate), ('hay', mz.hay), ('weeds', mz.weeds), ('q_sign', mz.question_sign), ('plot', mz.stake_plot)]:

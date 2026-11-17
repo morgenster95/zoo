@@ -43,6 +43,9 @@ def slice_sheet(fn, names, rows, shadow=False, prefix='', grow=2):
         Image.fromarray(sub).save(os.path.join(OUT, f'{prefix}{name}.png'))
     return len(ordered)
 
+PLANTS = ['oak1', 'oak2', 'oak3', 'pine1', 'pine2', 'birch', 'cherry', 'palm', 'bush1', 'bush2', 'flowers', 'reeds', 'tuft', 'bamboo', 'acacia', 'shrub']
+TREE_SHADOW = ['oak1', 'oak2', 'oak3', 'pine1', 'pine2', 'birch', 'cherry', 'palm', 'bamboo', 'acacia']
+CHEAP = ['alpaca', 'goat', 'sheep', 'rabbit', 'duck', 'donkey', 'pig', 'peacock', 'capybara', 'redpanda', 'meerkat', 'tortoise']
 B1 = ['lodge', 'barn', 'pagoda', 'penguin_house', 'treehouse', 'aquarium', 'cafe', 'shop', 'aviary']
 B2 = ['carousel', 'ferris', 'station', 'playground', 'toilets', 'clinic', 'ticket', 'gate', 'popcorn']
 
@@ -65,6 +68,13 @@ B2 = ['carousel', 'ferris', 'station', 'playground', 'toilets', 'clinic', 'ticke
 if __name__ == '__main__':
     # aktuální sada = „chunky“ (hustota pixelů jako naše sprity); detailní sheety zůstávají v sprites_detailed
     print('zvířata:', slice_sheet('animals_sheet_chunky_1.png', ANIMALS, 3, prefix='a_', grow=1)); add_shadow('a_')
+    print('levná zvířata:', slice_sheet('animals_sheet_cheap_1.png', CHEAP, 3, prefix='a_', grow=1)); add_shadow('a_')
+    print('rostliny:', slice_sheet('plants_sheet_chunky_1.png', PLANTS, 4, prefix='', grow=1))
+    for n in TREE_SHADOW:                        # stín pod kmenem: strom pevně stojí na zemi
+        f = os.path.join(OUT, n + '.png'); im = Image.open(f).convert('RGBA'); out = Image.new('RGBA', (im.width + 2, im.height + 2), (0, 0, 0, 0))
+        from PIL import ImageDraw
+        ImageDraw.Draw(out).ellipse([out.width // 2 - max(5, im.width // 3), im.height - 2, out.width // 2 + max(5, im.width // 3), im.height + 1], fill=(40, 90, 45, 110))
+        out.alpha_composite(im, (1, 0)); out.save(f)
     print('dekorace:', slice_sheet('decor_sheet_chunky_1.png', DECOR, 4, prefix='d_', grow=0))
     print('budovy:', slice_sheet('buildings_sheet_3_chunky.png', B1, 3, prefix='bp_', grow=2), slice_sheet('buildings_sheet_4_chunky.png', B2, 3, prefix='bp_', grow=2))
     im = Image.open(os.path.join(SRC, 'ferris_chunky.png')).convert('RGBA'); im.crop(im.getbbox()).save(os.path.join(OUT, 'bp_ferris.png'))

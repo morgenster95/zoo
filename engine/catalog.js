@@ -14,6 +14,13 @@ export const CATALOG = {
   cart:         { key: 'ICECREAM', name: 'Ice cream cart',        group: 'service', price: 100,  lot: { t: 'build', sprite: 'd_kiosk' } },
   cafe:         { key: 'CAFE',     name: 'Modern café',           group: 'service', price: 300,  lot: { t: 'build', sprite: 'bp_cafe' } },
   shop:         { key: 'SHOP',     name: 'Gift shop',             group: 'service', price: 350,  lot: { t: 'build', sprite: 'bp_shop' } },
+  // levná zvířata (malý výběh pro začátek zoo)
+  alpacas:      { key: 'ALPACAS',  name: 'Alpaca meadow',         group: 'enclosure', price: 120,  lot: { t: 'paddock', animals: ['alpaca', 'alpaca'] } },
+  goats:        { key: 'GOATS',    name: 'Goat corner',           group: 'enclosure', price: 100,  lot: { t: 'paddock', animals: ['goat', 'goat', 'sheep'] } },
+  rabbits:      { key: 'RABBITS',  name: 'Bunny garden',          group: 'enclosure', price: 80,   lot: { t: 'paddock', animals: ['rabbit', 'rabbit', 'rabbit'] } },
+  ducks:        { key: 'DUCKS',    name: 'Duck pond',             group: 'enclosure', price: 70,   lot: { t: 'pond', animals: ['duck', 'duck'] } },
+  peacocks:     { key: 'PEACOCK',  name: 'Peacock lawn',          group: 'enclosure', price: 150,  lot: { t: 'paddock', animals: ['peacock', 'peacock'] } },
+  redpandas:    { key: 'REDPANDA', name: 'Red panda tree',        group: 'enclosure', price: 350,  lot: { t: 'paddock', animals: ['redpanda', 'redpanda'], house: 'bp_pagoda' } },
   // výběhy
   giraffes:     { key: 'GIRAFFES', name: 'Giraffe paddock',       group: 'enclosure', price: 600,  lot: { t: 'paddock', animals: ['giraffe', 'giraffe'], house: 'bp_lodge' } },
   elephants:    { key: 'ELEPHANT', name: 'Elephant yard',         group: 'enclosure', price: 900,  lot: { t: 'paddock', animals: ['elephant', 'elephant'], house: 'bp_barn' } },
@@ -34,7 +41,6 @@ export const CATALOG = {
   train:        { key: 'TRAIN',    name: 'Zoo train station',     group: 'attraction', price: 1800, lot: { t: 'build', sprite: 'bp_station' } },
   // vylepšení vstupu (nezabírá parcelu)
   stonegate:    { key: 'GATE',     name: 'Stone entrance gate',   group: 'landmark', price: 1500, lot: { t: 'upgrade', what: 'gate', sprite: 'bp_gate' } },
-  ticketbooth:  { key: 'BOOTH',    name: 'New ticket booth',      group: 'landmark', price: 400,  lot: { t: 'upgrade', what: 'kasa', sprite: 'bp_ticket' } },
   aviary:       { key: 'AVIARY',   name: 'Glass aviary',          group: 'attraction', price: 1000, lot: { t: 'build', sprite: 'bp_aviary' } },
 };
 

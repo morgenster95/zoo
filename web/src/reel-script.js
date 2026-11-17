@@ -98,12 +98,7 @@ export function plan(tl) {
   steps.forEach((s) => events.push({ t: s.t, type: 'tick' }));
   events.push({ t: fenceDone - 0.2, type: 'thunk' }, { t: fenceDone, type: 'spark' });
   // ---- náhledy staveb (ghost) na volné parcele při hlasování
-  const previews = [
-    { name: 'bp_cafe', label: 'CAFE', price: 300, t: cue.vote + 2.0 },
-    { name: 'bp_playground', label: 'PLAYGROUND', price: 250, t: cue.vote + 3.4 },
-    { name: 'bp_penguin_house', label: 'PENGUINS', price: 500, t: cue.vote + 4.8 },
-  ];
-  previews.forEach((p) => events.push({ t: p.t, type: 'pop' }, { t: p.t + 0.05, type: 'spark' }));
+  const previews = [];                                     // ve vzoru se nenabízí výběr: otevřená otázka, rozhoduje nejlépe hodnocený komentář
   const bus = walker([[0.5, 21], [0.5, 10.4]], cue.bus - 0.2, 4.2);
   events.push({ t: cue.bus - 0.2, type: 'whoosh' });
   events.sort((a, b) => a.t - b.t);

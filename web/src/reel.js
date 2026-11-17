@@ -83,7 +83,7 @@ function prop(name, i, j, z = 0, dx = 0, dy = 0) {
 }
 
 // statická scéna: poslední dva výběhy (plot se staví v reelu), parcely, vstup, les
-const TREES = ['oak1', 'oak2', 'oak3', 'pine1', 'birch'];
+const TREES = ['oak1', 'oak2', 'oak3', 'pine1', 'pine2', 'birch'];
 let zebraA = null, zebraB = null, previewPlot = null;
 for (const [key, lot] of Object.entries(lots)) {
   const [a, b] = key.split(',').map(Number);
@@ -111,7 +111,7 @@ prop('gate_post', -0.5, GATE_J + 0.9, 6); prop('gate_post', 1.5, GATE_J + 0.9, 6
 { const b = prop('gate_beam', -0.5, GATE_J + 0.9, 7, 0, -29); b.anchor.set(1 / propTex.gate_beam.m.w, 1 / propTex.gate_beam.m.h); }
 prop('sign_welcome', -2.6, GATE_J + 1.6, 4); prop('crate', -3.2, GATE_J + 0.9, 1); prop('crate', -2.8, GATE_J + 1.2, 1); prop('hay', -4.4, GATE_J + 0.5, 1);
 const KI = 4.2, KJ = GATE_J + 1.7;
-const kasa = prop('kasa', KI, KJ, 2);
+const kasa = prop('bp_ticket', KI, KJ, 2);
 const coinFloat = new Sprite(); coinFloat.anchor.set(0.5, 1); coinFloat.zIndex = 99999; objects.addChild(coinFloat);
 const coinFloatBase = { x: Math.round(sx(KI, KJ)), y: Math.round(sy(KI, KJ)) - kasa.height + 7 };
 prop('d_bench_wood', -1.8, 1.5, 1); prop('d_bench_green', 2.0, 1.5, 1); prop('d_lamp', -1.5, -1.5, 1); prop('d_lamp', 2.5, -1.4, 1); prop('d_bin', 2.6, 0.9, 1);
@@ -197,7 +197,7 @@ function captionAt(t) {
 const boxes = [
   { t0: P.cue.coins - 0.1, t1: P.cue.coins + 3.3, y: 430, lines: ['1 FOLLOWER =', '1 VISITOR + 10 COINS'], top: '#f2b53c' },
   { t0: P.cue.escape - 0.2, t1: P.cue.fence + 0.3, y: 430, lines: ['NO FENCE!'], top: '#ef5b5b', bg: '#7a2a2a', sc: 9 },
-  { t0: P.cue.vote - 0.1, t1: P.cue.bus - 0.4, y: 430, lines: ['MOST LIKED COMMENT', 'DECIDES WHAT WE', 'BUILD NEXT'], top: '#f2b53c' },
+  { t0: P.cue.vote - 0.1, t1: P.cue.bus - 0.4, y: 430, lines: ['WHAT SHOULD WE', 'BUILD NEXT?', 'MOST LIKED COMMENT WINS'], top: '#f2b53c' },
   { t0: P.cue.bus - 0.1, t1: P.cue.cta - 0.2, y: 430, lines: ['1 SHARE =', 'SCHOOL BUS +20 COINS'], top: '#f2b53c' },
   { t0: P.cue.cta - 0.1, t1: P.total, y: 430, lines: ['WHAT SHOULD WE', 'CALL OUR ZOO?'], top: '#ffd23c', bg: '#4a3430' },
 ].map((b) => {
@@ -239,6 +239,7 @@ P.arrivals.forEach((a) => addFloater('+10', '#ffd23c', 0.5, GATE_J + 0.3, a.tGat
 addFloater('-200', '#ff6a6a', KI, KJ - 0.2, P.tBuy, 1.4, 22);
 addFloater('+20', '#ffd23c', 0.5, GATE_J + 3.2, P.tBus + 0.5, 1.3, 22);
 
+const qBubbles = [[-1, 0], [0, 0]].map(([a, b]) => { const bx = lotBox(a, b); const sp = new Sprite(canvasTex(floatLike('?', '#ffd23c'))); sp.anchor.set(0.5, 1); sp.visible = false; objects.addChild(sp); return { sp, bx }; });
 // ------------------------------------------------------------ částice
 function dust(i, j, t0, t, n = 6) {
   const u = t - t0; if (u < 0 || u > 0.5) return;
@@ -347,6 +348,11 @@ function setTime(t) {
     if (c.visible) { const sc = 0.2 + ease(cu / 0.35) * 0.8 + Math.sin(Math.min(1, cu / 0.35) * Math.PI) * 0.12; c.scale.set(sc); c.pivot.set(150, 330); c.position.set(45 + k * 330 + 150, 1130 + 330); c.alpha = 1; }
   });
 
+  // ---- otazníky nad volnými parcelami (hlasování: otevřená otázka)
+  qBubbles.forEach(({ sp, bx }, k) => {
+    const on = t >= P.cue.vote + 0.3 && t < P.cue.bus - 0.4; sp.visible = on;
+    if (on) { const u = clampk((t - P.cue.vote - 0.3) / 0.35 - k * 0.3); sp.position.set(sx(bx.ci + 1, bx.cj + 1), sy(bx.ci + 1, bx.cj + 1) - 26 - Math.round(Math.sin(t * 3 + k) * 2)); sp.scale.set((0.4 + ease(u) * 0.6) * (1 + Math.sin(t * 5 + k) * 0.06)); sp.zIndex = 99999; }
+  });
   // ---- autobus
   const bs = P.bus;
   if (t >= bs.t0) {

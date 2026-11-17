@@ -29,3 +29,10 @@ node tools/record-reel.mjs hook --still 12.5 --still 20   # jen náhledové sní
 ```
 Soubory: `web/src/reel-script.js` (plán, příchody, plot, události), `web/src/reel.js` (vykreslení: HUD, titulky, efekty), `marketing/reels/hook/script.json` (text hlasu).
 Hlas je zatím macOS „Samantha“ (zdarma, robotický); pro ostrý reel jej vyměnit za lepší TTS nebo nahrávku, časování se přepočítá samo (`voice`).
+
+## Změny po prvním náhledu (18. 11. 2026)
+- **Hlas:** edge-tts `en-US-AvaNeural` (ve frontě je Guy/Ryan), časy titulků z přesných hranic slov.
+- **Hudba a efekty:** měkké sinusy a dozvuk místo čtvercových vln; cinká jen u prvních dvou příchodů, příchodů je jen 13 (ilustrativně).
+- **Hlasování:** podle vzoru **otevřená otázka** („WHAT SHOULD WE BUILD NEXT? MOST LIKED COMMENT WINS“), žádné karty s nabídkou. Možnosti nabízíme až v denních postech, kde je vybírá majitel (`docs/MECHANICS.md`). Nad volnými parcelami se vznášejí otazníky.
+- **Grafika:** autobus, pokladna (`bp_ticket`), stromy (chunky sheet `plants_sheet_chunky_1`) a levná zvířata (alpaka místo zebry, sheet `animals_sheet_cheap_1`) z PixelLabu, vše v jednotné hustotě pixelů. Stromy mají stín pod kmenem a pevné kotvy.
+- Efekt „vyskočení“ budovy je připravený (`dust` + `spark` + pop scale v `reel.js`) pro den, kdy se skutečně něco postaví.
