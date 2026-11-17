@@ -20,7 +20,7 @@ def slice_sheet(fn, names, rows, shadow=False, prefix='', grow=2):
         m = (a[:, :, 0] == 215) & (a[:, :, 1] == 219) & (a[:, :, 2] == 196) & (a[:, :, 3] > 0)
         a[m] = (40, 90, 45, 110)
     mask = a[:, :, 3] > 0
-    grown = ndi.binary_dilation(mask, structure=np.ones((3, 3)), iterations=grow)
+    grown = ndi.binary_dilation(mask, structure=np.ones((3, 3)), iterations=grow) if grow > 0 else mask
     lab, n = ndi.label(grown, structure=np.ones((3, 3)))
     comps = []
     for k in range(1, n + 1):
@@ -46,10 +46,25 @@ def slice_sheet(fn, names, rows, shadow=False, prefix='', grow=2):
 B1 = ['lodge', 'barn', 'pagoda', 'penguin_house', 'treehouse', 'aquarium', 'cafe', 'shop', 'aviary']
 B2 = ['carousel', 'ferris', 'station', 'playground', 'toilets', 'clinic', 'ticket', 'gate', 'popcorn']
 
+def add_shadow(prefix):
+    """chunky zvířata nemají stín: pod nohy přidá poloprůhlednou elipsu (stejná jako u ostatních)"""
+    for fn in os.listdir(OUT):
+        if not (fn.startswith(prefix) and fn.endswith('.png')): continue
+        im = Image.open(os.path.join(OUT, fn)).convert('RGBA')
+        out = Image.new('RGBA', (im.width + 2, im.height + 3), (0, 0, 0, 0))
+        from PIL import ImageDraw
+        d = ImageDraw.Draw(out)
+        cx = out.width // 2; rx = max(5, int(im.width * 0.42))
+        d.ellipse([cx - rx, im.height - 2, cx + rx, im.height + 1], fill=(40, 90, 45, 110))
+        out.alpha_composite(im, (1, 0))
+        out.save(os.path.join(OUT, fn))
+
+B1 = ['lodge', 'barn', 'pagoda', 'penguin_house', 'treehouse', 'aquarium', 'cafe', 'shop', 'aviary']
+B2 = ['carousel', 'ferris', 'station', 'playground', 'toilets', 'clinic', 'ticket', 'gate', 'popcorn']
+
 if __name__ == '__main__':
+    # aktuální sada = „chunky“ (hustota pixelů jako naše sprity); detailní sheety zůstávají v sprites_detailed
+    print('zvířata:', slice_sheet('animals_sheet_chunky_1.png', ANIMALS, 3, prefix='a_', grow=1)); add_shadow('a_')
+    print('dekorace:', slice_sheet('decor_sheet_chunky_1.png', DECOR, 4, prefix='d_', grow=0))
     print('budovy:', slice_sheet('buildings_sheet_3_chunky.png', B1, 3, prefix='bp_', grow=2), slice_sheet('buildings_sheet_4_chunky.png', B2, 3, prefix='bp_', grow=2))
-    n1 = slice_sheet('animals_sheet_small_1.png', ANIMALS, 3, shadow=True, prefix='a_')
-    n2 = slice_sheet('decor_sheet_small_1.png', DECOR, 4, prefix='d_', grow=1)
-    print('sprity:', n1, n2)
-    # kolo z jednotlivého generování nahradí rozbité z sheetu 4
     im = Image.open(os.path.join(SRC, 'ferris_chunky.png')).convert('RGBA'); im.crop(im.getbbox()).save(os.path.join(OUT, 'bp_ferris.png'))

@@ -85,6 +85,15 @@ Prompt: „chunky low-detail, early 1990s city builder, thick outline, windows 3
 Původní detailní sprity zůstaly v `art/pixellab/sprites_detailed/` (vhodné pro karty a close-upy). Srovnání: `styles/density_mine_vs_pixellab.png` (nahoře moje, uprostřed detailní, dole chunky).
 **Celkem 56 generací** (zůstatek viz `tools/pixellab.py balance`). Pravidlo pro další generování: nejdřív ověřit, kolik pixelů má okno a dveře vs. návštěvník (10 px), a velikost plátna volit podle toho.
 
+### Hustota zvířat a dekorací (kontrola 17. 11. 2026)
+
+První PixelLab sheety zvířat a dekorací (128²) byly také příliš jemné a velké: koš byl vysoký jako návštěvník, lavička 2× větší než moje, zvířata ~1,3× větší s jemnými texturami (zebra jako šachovnice).
+Opraveno stejným postupem jako u budov, ale na ještě menším plátně a s kotvou z našich spritů:
+`animals_sheet_chunky_1` (112×96, 6 gen, zvířata 18–26 px, kotva `anchor_animals_chunky.png`) a `decor_sheet_chunky_1` (96×96, 5 gen, dekorace 12–18 px, kotva `anchor_decor_chunky.png`).
+Stín pod zvířaty se přidává ve slicru (`add_shadow`). Pravidlo velikosti plátna: ≤96 px = drobné rekvizity, ~112 = zvířata, 192 = budovy, 256 jen pro karty/close-upy.
+Detailnější verze všech sheetů jsou v `art/pixellab/sprites_detailed/` (karty, close-upy). Srovnání: `styles/density_animals_decor.png` (řádek 1 moje zvířata, 2 nové PixelLab, 3 moje rekvizity, 4 nové dekorace).
+**Celkem 67 generací** (zůstatek 1 151).
+
 Plán:
 - **Kulisy, zvířata, budovy, terén:** vlastní generace (kód) nebo PixelLab (`create_object_pro_flash`, izometrie) – podle toho, co vypadá lépe; vždy s paletou výše.
 - **Návštěvníci (stovky variant, chůze 4–8 směrů):** PixelLab `create_character` + animace (postup z fronty: `tools/pixellab.py`, ledger proti duplikátům, `sprite_qa.py`). Generace jsou omezené, proto jednou správně.
