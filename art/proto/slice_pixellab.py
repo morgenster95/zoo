@@ -47,7 +47,9 @@ B1 = ['lodge', 'barn', 'pagoda', 'penguin_house', 'treehouse', 'aquarium', 'cafe
 B2 = ['carousel', 'ferris', 'station', 'playground', 'toilets', 'clinic', 'ticket', 'gate', 'popcorn']
 
 if __name__ == '__main__':
-    print('budovy:', slice_sheet('buildings_sheet_1.png', B1, 3, prefix='bp_', grow=2), slice_sheet('buildings_sheet_2.png', B2, 3, prefix='bp_', grow=2))
+    print('budovy:', slice_sheet('buildings_sheet_3_chunky.png', B1, 3, prefix='bp_', grow=2), slice_sheet('buildings_sheet_4_chunky.png', B2, 3, prefix='bp_', grow=2))
     n1 = slice_sheet('animals_sheet_small_1.png', ANIMALS, 3, shadow=True, prefix='a_')
     n2 = slice_sheet('decor_sheet_small_1.png', DECOR, 4, prefix='d_', grow=1)
     print('sprity:', n1, n2)
+    # kolo z jednotlivého generování nahradí rozbité z sheetu 4
+    im = Image.open(os.path.join(SRC, 'ferris_chunky.png')).convert('RGBA'); im.crop(im.getbbox()).save(os.path.join(OUT, 'bp_ferris.png'))

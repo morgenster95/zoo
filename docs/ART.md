@@ -76,6 +76,15 @@ Stylové kotvy (nahrávají se jako `style_image`, v nativním rozlišení): `ar
 Sprity v mapě: `a_<zvíře>` (PixelLab, stín přebarven na poloprůhledný), `d_<dekorace>`; moje původní zvířata zůstávají jako `old_a_*`.
 Další sheety dělat stejně (jeden sheet, kotva stylu, před odesláním zkontrolovat ledger).
 
+## Hustota pixelů (oprava 17. 11. 2026): „chunky“ budovy
+
+První sheety staveb z PixelLabu (`buildings_sheet_1/2`, 256²) měly zhruba **2× jemnější pixelovou hustotu** než moje sprity a návštěvníci (okna 1–2 px, textury střech, drobné detaily), takže na mapě nesedělo měřítko.
+Zmenšení na půlku nepomohlo (rozmazané). Správný postup: **generovat v menším plátně a s kotvou z našich chunky spritů**:
+`buildings_sheet_3_chunky` (192², 6 gen), `buildings_sheet_4_chunky` (192², 6 gen) a samostatné ruské kolo `ferris_chunky` (64×80, 5 gen, kolo ze sheetu bylo rozpadlé).
+Prompt: „chunky low-detail, early 1990s city builder, thick outline, windows 3–4 px, no tiny textures“ + kotva `anchor_buildings_chunky.png`; kotva MUSÍ být menší než plátno (jinak ji PixelLab odmítne bez účtování).
+Původní detailní sprity zůstaly v `art/pixellab/sprites_detailed/` (vhodné pro karty a close-upy). Srovnání: `styles/density_mine_vs_pixellab.png` (nahoře moje, uprostřed detailní, dole chunky).
+**Celkem 56 generací** (zůstatek viz `tools/pixellab.py balance`). Pravidlo pro další generování: nejdřív ověřit, kolik pixelů má okno a dveře vs. návštěvník (10 px), a velikost plátna volit podle toho.
+
 Plán:
 - **Kulisy, zvířata, budovy, terén:** vlastní generace (kód) nebo PixelLab (`create_object_pro_flash`, izometrie) – podle toho, co vypadá lépe; vždy s paletou výše.
 - **Návštěvníci (stovky variant, chůze 4–8 směrů):** PixelLab `create_character` + animace (postup z fronty: `tools/pixellab.py`, ledger proti duplikátům, `sprite_qa.py`). Generace jsou omezené, proto jednou správně.
