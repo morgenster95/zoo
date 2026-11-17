@@ -83,7 +83,15 @@ function bakeGround() {
   s.position.set(x0, y0); groundLayer.addChild(s);
 }
 
+// ?sprites=old ukáže původní sprity (moje procedurální) místo PixelLabu; jen pro srovnání
+const OLD = new URLSearchParams(location.search).get('sprites') === 'old';
+const OLD_ALIAS = { bp_lodge: 'b_african', bp_barn: 'b_classic', bp_pagoda: 'b_asian', bp_penguin_house: 'b_igloo', bp_treehouse: 'b_andes', bp_aquarium: 'b_modern',
+  bp_cafe: 'b_modern', bp_shop: 'b_classic', bp_aviary: 'b_dome', bp_carousel: 'b_carousel', bp_ferris: 'b_dome', bp_station: 'b_classic', bp_playground: 'b_cart',
+  bp_toilets: 'b_classic', bp_clinic: 'b_modern', bp_ticket: 'kasa', bp_gate: 'gate', bp_popcorn: 'b_cart',
+  d_bench_wood: 'bench', d_bench_green: 'bench', d_bench_stone: 'bench', d_bench_color: 'bench', d_kiosk: 'b_cart', d_planter: 'flowers', d_lamp: 'bench', d_bin: 'crate',
+  d_fountain: 'b_igloo', d_statue: 'bench', d_balloons: 'b_cart', d_picnic: 'bench' };
 function prop(name, i, j, z = 0, dx = 0, dy = 0) {
+  if (OLD) name = name.startsWith('a_') ? 'old_' + name : (OLD_ALIAS[name] || name);
   const p = propTex[name];
   const s = new Sprite(p.t);
   s.anchor.set(p.m.ax / p.m.w, p.m.ay / p.m.h);
