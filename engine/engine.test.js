@@ -128,3 +128,15 @@ test('když dojdou volné bloky, mapa se rozšíří o prstenec a parcely jsou v
   assert.ok(freePlots(s).length >= 2);
   assert.ok(s.ring >= 2, 'ring=' + s.ring);
 });
+
+test('vylepšení vstupu se zaplatí, ale nezabere parcelu', () => {
+  const s = zooWith(200);
+  const plotsBefore = freePlots(s).length;
+  openVote(s, ['stonegate', 'bench']);
+  const r = resolveVote(s);
+  assert.equal(r.winner, 'GATE');
+  assert.equal(s.upgrades.gate, 'bp_gate');
+  assert.equal(r.lot, null);
+  assert.ok(freePlots(s).length >= plotsBefore);
+  assert.equal(balance(s), 2000 - 1500);
+});

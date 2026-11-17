@@ -71,7 +71,7 @@ V mapě: louky mají mix (30 % stromy, jinak keře/květiny/tráva), okraj je ř
 
 Nástroj: `tools/pixellab.py` (klíč jen v prostředí `PIXELLAB_API_KEY`, nikdy v repu). Pojistky: **ledger** `art/pixellab/ledger.jsonl` (stejný název = nic se neodešle), fronta max 6 úloh, jedno odeslání bez automatických opakování, zůstatek `balance`.
 Úspornost: **jeden obrázek = celý sheet** (jedna úloha za 5–9 generací, ceník podle delší strany: ≤96 px 5, ≤128 px 6, ≤256 px 9), pak řez na sprity (`art/proto/slice_pixellab.py`).
-Použito: `animals_sheet_1` (256², 9 gen, 12 zvířat ve velkém rozlišení pro karty a close-upy), `animals_sheet_small_1` (128², 6 gen, 12 zvířat v měřítku mapy), `decor_sheet_small_1` (128², 6 gen, 16 dekorací). **Celkem 21 generací** (zůstatek 1 197 z 2 000).
+Použito: `animals_sheet_1` (256², 9 gen, 12 zvířat ve velkém rozlišení pro karty a close-upy), `animals_sheet_small_1` (128², 6 gen, 12 zvířat v měřítku mapy), `decor_sheet_small_1` (128², 6 gen, 16 dekorací). `buildings_sheet_1` (256², 9 gen: chýše, stáj, pagoda, tučňáčí dům, domek na stromě, akvárium, kavárna, obchod, voliéra) a `buildings_sheet_2` (256², 9 gen: kolotoč, kolo, nádraží, hřiště, toalety, nemocnice, pokladna, kamenná brána, popcorn). **Celkem 39 generací.**
 Stylové kotvy (nahrávají se jako `style_image`, v nativním rozlišení): `art/pixellab/anchor_wildlife.png` (vzor od uživatele) a `anchor_decor_small.png` (naše rekvizity).
 Sprity v mapě: `a_<zvíře>` (PixelLab, stín přebarven na poloprůhledný), `d_<dekorace>`; moje původní zvířata zůstávají jako `old_a_*`.
 Další sheety dělat stejně (jeden sheet, kotva stylu, před odesláním zkontrolovat ledger).

@@ -8,7 +8,7 @@ export function publicData(state) {
   const n = state.visitors.length;
   const zoo = {
     v: 1, updated: state.updated, day: state.day, visitors: n, coins: balance(state), spent: state.spent || 0,
-    ring: state.ring || 1, lots: state.lots, vote: publicVote(state.vote), history: (state.history || []).slice(-10), shards: SHARDS, lookChunk: LOOK_CHUNK, lookChunks: Math.ceil(n / LOOK_CHUNK), idxChunk: IDX_CHUNK,
+    ring: state.ring || 1, upgrades: state.upgrades || {}, lots: state.lots, vote: publicVote(state.vote), history: (state.history || []).slice(-10), shards: SHARDS, lookChunk: LOOK_CHUNK, lookChunks: Math.ceil(n / LOOK_CHUNK), idxChunk: IDX_CHUNK,
   };
   const looks = [];
   for (let c = 0; c * LOOK_CHUNK < n; c++) {

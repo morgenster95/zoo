@@ -66,12 +66,16 @@ export function resolveVote(state, day = state.day) {
   if (!best) { v.closed = true; v.result = { none: true, counts }; return v.result; }
   let top = -1;
   for (const o of v.options) if (counts[o.key] > top && balance(state) >= o.price) { top = counts[o.key]; best = o; }
-  const plots = freePlots(state);
-  if (!plots.length) ensurePlots(state, 1);
-  const lotId = freePlots(state)[0];
   const item = CATALOG[best.id];
+  let lotId = null;
   state.spent = (state.spent || 0) + item.price;
-  state.lots[lotId] = { ...JSON.parse(JSON.stringify(item.lot)), item: best.id, day };
+  if (item.lot.t === 'upgrade') {                 // vstupní brána, pokladna: mění stávající budovu, parcelu nezabírá
+    (state.upgrades ||= {})[item.lot.what] = item.lot.sprite;
+  } else {
+    if (!freePlots(state).length) ensurePlots(state, 1);
+    lotId = freePlots(state)[0];
+    state.lots[lotId] = { ...JSON.parse(JSON.stringify(item.lot)), item: best.id, day };
+  }
   ensurePlots(state, 2);
   v.closed = true;
   v.result = { winner: best.key, id: best.id, lot: lotId, price: item.price, counts, total: Object.values(counts).reduce((a, b) => a + b, 0) };

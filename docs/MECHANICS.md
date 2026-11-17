@@ -49,6 +49,11 @@ Základ je z fronty (denní rytmus, hlasování v komentářích, noviny), jen m
 - **Vždy aspoň 2 volné parcely.** Když dojdou bloky, mapa se rozšíří o prstenec (`state.ring`), i když návštěvníků ještě není tolik.
 - Implementace: `engine/catalog.js` (katalog), `engine/vote.js` (otevřít, hlas, vyhodnotit, parcely), `tools/daily.mjs` (denní tah), web ukazuje panel „Tonight's vote“. Testy v `engine/engine.test.js`.
 
+## 8b. Katalog staveb (sprity z PixelLabu, `engine/catalog.js`)
+Výběhy (domek + zvířata na parcele): žirafy (lodge 600), sloni (stáj 900), lvi (lodge 700), pandy (pagoda 800), tygři (pagoda 750), opice (domek na stromě 450), tučňáci (ledový dům 500), hroši (laguna 650), akvárium 1 200.
+Služby: kavárna 300, obchod 350, hřiště 250, toalety 200, popcorn 160, zmrzlina 100, nemocnice 900. Atrakce: kolotoč 800, voliéra 1 000, nádraží 1 800, ruské kolo 2 500. Výzdoba 20–250.
+Vylepšení vstupu (nezabírají parcelu): kamenná brána 1 500, nová pokladna 400. Ukázka plné zoo: `node tools/demo-state.mjs` (jen náhled, `docs/screens/web_demo_built_zoo.jpg`).
+
 ## 9. Ještě otevřené
 - Napojení Instagramu: komentáře → `castVote`, počet followerů → nové návštěvníky.
 - Noviny (Zoo Gazette) a deníky návštěvníků, milníky 100/500/1 000/5 000/10 000.

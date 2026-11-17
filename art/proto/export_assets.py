@@ -61,7 +61,7 @@ if os.path.isdir(PL):
     for fn in sorted(os.listdir(PL)):
         if not fn.endswith('.png'): continue
         im = Image.open(os.path.join(PL, fn)).convert('RGBA'); nm = fn[:-4]
-        add(nm, im, (im.width // 2, im.height - (3 if nm.startswith('a_') else 2)))
+        add(nm, im, (im.width // 2, im.height - (3 if nm.startswith('a_') else 5 if nm.startswith('bp_') else 2)))
 for n, f in veg.ALL:
     im = f()
     add(n, im, (im.width // 2, im.height - 4 if n not in ('flowers', 'tuft', 'bush1', 'bush2', 'reeds') else im.height - 2))

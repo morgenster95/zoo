@@ -111,8 +111,9 @@ function buildLots() {
     if (lot && (lot.t === 'paddock' || lot.t === 'pond')) {
       fenceRect(bx.i0, bx.j0, bx.i1, bx.j1);
       if (lot.t === 'pond') { prop('reeds', bx.ci - 1.6, bx.cj + 1.4, 3); prop('reeds', bx.ci + 1.7, bx.cj - 1.3, 1); }
+      if (lot.house && propTex[lot.house]) prop(lot.house, bx.i0 + 2.1, bx.j0 + 2.1, 1);
       (lot.animals || []).forEach((an, k) => {
-        const p = lot.t === 'pond' ? [bx.ci - 0.7 + k * 1.1, bx.cj - 0.4 + k * 0.9] : [bx.i0 + 0.9 + rng() * (bx.i1 - bx.i0 - 1.8), bx.j0 + 0.9 + rng() * (bx.j1 - bx.j0 - 1.8)];
+        const p = lot.t === 'pond' ? [bx.ci - 0.7 + k * 1.1, bx.cj - 0.4 + k * 0.9] : lot.house ? [bx.ci + 0.4 + rng() * 1.3, bx.cj + 0.4 + rng() * 1.3] : [bx.i0 + 0.9 + rng() * (bx.i1 - bx.i0 - 1.8), bx.j0 + 0.9 + rng() * (bx.j1 - bx.j0 - 1.8)];
         const s = prop('a_' + an, p[0], p[1], 1);
         if (rng() < 0.5) s.scale.x = -1;
       });
@@ -120,7 +121,8 @@ function buildLots() {
       prop('plot', bx.ci + 1, bx.cj + 1, 0);
       prop('q_sign', bx.ci - 1.2, bx.cj + 1.6, 4);
     } else if (lot && lot.t === 'build' && propTex[lot.sprite]) {
-      prop(lot.sprite, bx.ci + 1, bx.cj + 1, 1);
+      prop(lot.sprite, bx.ci + 0.4, bx.cj + 0.4, 1);
+      (lot.animals || []).forEach((an, k) => { const sp = prop('a_' + an, bx.ci + 1.4 + (k % 2) * 0.9, bx.cj + 1.1 + k * 0.5, 2); if (k % 2) sp.scale.x = -1; });
     } else {
       // volná louka: pár stromů, keřů a plevele (hustota klesá s růstem zoo)
       const n = 3 + Math.floor(rng() * 3);
@@ -145,10 +147,11 @@ function buildBorder() {
 
 let board, boardSprite;
 function buildEntrance() {
-  prop('gate', 0.5, GATE_J + 0.9, 6);
+  const up = zoo.upgrades || {};
+  if (up.gate && propTex[up.gate]) prop(up.gate, 0.5, GATE_J + 1.3, 6); else prop('gate', 0.5, GATE_J + 0.9, 6);
   prop('sign_welcome', -2.6, GATE_J + 1.6, 4);
   prop('crate', -3.2, GATE_J + 0.9, 1); prop('crate', -2.8, GATE_J + 1.2, 1); prop('hay', -4.4, GATE_J + 0.5, 1);
-  const k = prop('kasa', 3.4, GATE_J + 0.6, 2);
+  const k = prop(up.kasa && propTex[up.kasa] ? up.kasa : 'kasa', 3.4, GATE_J + 0.6, 2);
   boardSprite = new Sprite(); boardSprite.anchor.set(0.5, 1);
   boardSprite.position.set(Math.round(sx(3.4, GATE_J + 0.6)) - 1, Math.round(sy(3.4, GATE_J + 0.6)) - k.height + 24);
   boardSprite.zIndex = (3.4 + GATE_J + 0.6) * 10 + 3;

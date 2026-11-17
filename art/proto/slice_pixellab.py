@@ -43,7 +43,11 @@ def slice_sheet(fn, names, rows, shadow=False, prefix='', grow=2):
         Image.fromarray(sub).save(os.path.join(OUT, f'{prefix}{name}.png'))
     return len(ordered)
 
+B1 = ['lodge', 'barn', 'pagoda', 'penguin_house', 'treehouse', 'aquarium', 'cafe', 'shop', 'aviary']
+B2 = ['carousel', 'ferris', 'station', 'playground', 'toilets', 'clinic', 'ticket', 'gate', 'popcorn']
+
 if __name__ == '__main__':
+    print('budovy:', slice_sheet('buildings_sheet_1.png', B1, 3, prefix='bp_', grow=2), slice_sheet('buildings_sheet_2.png', B2, 3, prefix='bp_', grow=2))
     n1 = slice_sheet('animals_sheet_small_1.png', ANIMALS, 3, shadow=True, prefix='a_')
     n2 = slice_sheet('decor_sheet_small_1.png', DECOR, 4, prefix='d_', grow=1)
     print('sprity:', n1, n2)
