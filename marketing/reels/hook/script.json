@@ -1,8 +1,8 @@
 {
  "title": "Hook: Day 1 of the zoo (kopie struktury vzorov\u00e9ho vir\u00e1ln\u00edho videa)",
- "voice": "en-US-AndrewNeural",
- "rate": "+17%",
- "gap": 0.1,
+ "voice": "en-US-AnaNeural",
+ "rate": "+38%",
+ "gap": 0.08,
  "lead": 0.35,
  "tail": 1.7,
  "lines": [
@@ -52,5 +52,5 @@
    "hold": 0.0
   }
  ],
- "pitch": "+3Hz"
+ "pitch": "+2Hz"
 }
