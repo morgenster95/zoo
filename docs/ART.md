@@ -46,6 +46,14 @@ Známé slabiny: chybí chůze a jiné směry než bok (zepředu/zezadu), lev a 
 - Výstupy: `styles/visitors_types.png`, `visitors_crowd.png`, `visitors_walk.gif`, `C_hybrid_scene_visitors.png`.
 - Slabiny: bez bočního pohledu, jen zepředu/zezadu; chůze je jednoduchá; žádné sezení na lavičce, krmení zvířat ani focení (další animace).
 
+## Test: replikace cizího stylu zvířat (`art/proto/painted.py`, 17. 11. 2026)
+
+Vzor: `art/reference/animal_style_sample.png` (malovaný pixel art, přirozené proporce, hodně tónů, obrys v odstínu zvířete, stín na zemi).
+Postavil jsem nový renderer: siluety z polygonů, objem z mapy výšky (vzdálenost od okraje) + osvětlení, 6tónová rampa s posunem odstínu, textura srsti, stín na zemi, vzory (skvrny, pruhy) přes tělo.
+**Výsledek:** materiál, barevnost, stíny a „malovaný“ dojem se přiblížily vzoru (srovnání `styles/painted_vs_reference.png`).
+**Slabé místo:** anatomie a siluety. Vzor má ručně vymodelované tvary (ohnuté nohy, výrazné hlavy), moje polygony jsou tužší, hlavy jednodušší, lev má oddělený ocas.
+**Závěr:** pro finální zvířata v tomhle stylu je lepší PixelLab se stylovým obrázkem (nebo ruční dokreslení), můj renderer se hodí na rychlé návrhy, stíny a sjednocení barev.
+
 Plán:
 - **Kulisy, zvířata, budovy, terén:** vlastní generace (kód) nebo PixelLab (`create_object_pro_flash`, izometrie) – podle toho, co vypadá lépe; vždy s paletou výše.
 - **Návštěvníci (stovky variant, chůze 4–8 směrů):** PixelLab `create_character` + animace (postup z fronty: `tools/pixellab.py`, ledger proti duplikátům, `sprite_qa.py`). Generace jsou omezené, proto jednou správně.

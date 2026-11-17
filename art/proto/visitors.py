@@ -16,7 +16,7 @@ STYLES_H = ['short', 'short', 'long', 'ponytail', 'curly', 'bun', 'bald', 'side'
 SHIRTS = [hx(x) for x in ['#e0503e', '#5b9bd8', '#f2b53c', '#8a5fc9', '#ff8fb8', '#46b88a', '#f08a30', '#f4f1ea', '#3fb5b5', '#a8d65a']]
 PANTS = [hx(x) for x in ['#3f4f80', '#5a3d30', '#3d4a5b', '#6f5a8a', '#b79a6a', '#2f3a55', '#7a8a9a']]
 BAL = [hx(x) for x in ['#ef5b5b', '#ffc93c', '#4aa8dc', '#ff8fb8', '#8a5fc9', '#52c78a']]
-TYPES = ['plain', 'family', 'schoolkid', 'photographer', 'balloon', 'tourist', 'grandpa', 'icecream', 'supporter']
+TYPES = ['plain', 'family', 'schoolkid', 'photographer', 'balloon', 'tourist', 'grandpa', 'icecream', 'supporter', 'plush', 'sitting']
 DIRS = ['SE', 'SW', 'NE', 'NW']
 W, H = 15, 34          # plátno: osoba x=4..10, balíky nahoře, kočárek vedle
 OX = 4
@@ -26,7 +26,7 @@ def new_spec(seed, kind=None, kid=None):
     kind = kind or r.choice(['plain'] * 6 + TYPES[1:])
     s = dict(kind=kind, skin=r.choice(SKINS), hair=r.choice(HAIRS), hstyle=r.choice(STYLES_H),
              shirt=r.choice(SHIRTS), pants=r.choice(PANTS), dress=r.random() < .3, shoes=hx('#3a2a32'),
-             kid=(r.random() < .22) if kid is None else kid, hat=None, acc=None, balloon=None, star=False, stroller=False, seed=seed)
+             kid=(r.random() < .22) if kid is None else kid, glasses=(r.random() < .12), hood=(r.random() < .12), plush=None, sit=False, hat=None, acc=None, balloon=None, star=False, stroller=False, seed=seed)
     if kind == 'schoolkid': s.update(kid=True, acc='backpack')
     elif kind == 'photographer': s.update(kid=False, acc='camera', hat=r.choice(SHIRTS), shirt=hx('#c9b27a'), pants=hx('#4a5a4a'))
     elif kind == 'balloon': s.update(balloon=[r.choice(BAL) for _ in range(r.choice([1, 2, 3]))])
@@ -34,6 +34,8 @@ def new_spec(seed, kind=None, kid=None):
     elif kind == 'grandpa': s.update(kid=False, acc='cane', hair=hx('#d8d8e0'), hstyle=r.choice(['short', 'bald', 'side']), shirt=r.choice([hx('#8aa0c8'), hx('#b89a8a'), hx('#9ab08a')]), pants=hx('#6a6a7a'))
     elif kind == 'icecream': s.update(kid=True, acc='icecream')
     elif kind == 'supporter': s.update(star=True, kid=False)
+    elif kind == 'plush': s.update(kid=True, plush=r.choice([hx('#c68a5a'), hx('#ff9bbd'), hx('#9ec8f0'), hx('#f2d58a')]))
+    elif kind == 'sitting': s.update(sit=True, kid=False)
     elif kind == 'family': s.update(kid=False, stroller=True, dress=r.random() < .5)
     if s['kid'] and kind == 'plain': s['hstyle'] = r.choice(['short', 'ponytail', 'curly', 'bun'])
     return s
@@ -48,6 +50,7 @@ def draw_person(spec, view, frame):
             px[X, Y] = shade_col(c, .84) if shade and x >= 5 else c
     bot = H - 1
     legh = 2 if not kid else 1
+    if spec['sit']: legh = 1
     bodyh = 3 if not kid else 2
     headh = 4 if not kid else 3
     total = headh + bodyh + legh + 1       # + bota
@@ -96,8 +99,11 @@ def draw_person(spec, view, frame):
     if view == 'front':
         ey = hy + (2 if not kid else 1)
         P(2, ey, dark, False); P(4, ey, dark, False)
-        P(1, ey + 1, hx('#ff9bb0'), False) if hh > 3 or True else None
+        P(1, ey + 1, hx('#ff9bb0'), False)
         P(5, ey + 1, hx('#ff9bb0'), False)
+        if spec['glasses']:
+            for x in range(1, 6): P(x, ey, hx('#2a2a3a'), False)
+            P(2, ey, hx('#6a8ab8'), False); P(4, ey, hx('#6a8ab8'), False)
     # vlasy
     if hs != 'bald':
         for x in range(hx0, hx1 + 1): P(x, hy, hr)
@@ -121,6 +127,10 @@ def draw_person(spec, view, frame):
             P(6, hy + 2, hr); P(6, hy + 3, hr)
         if hs == 'ponytail' and view == 'front':
             P(6, hy + 1, hr)
+    if spec['hood'] and spec['hat'] is None:
+        for yy in range(hy, hy + hh):
+            P(0, yy, spec['shirt']); P(6, yy, spec['shirt'])
+        for x in range(hx0, hx1 + 1): P(x, hy, spec['shirt'])
     # klobouk/čepice
     if spec['hat'] is not None:
         hc = spec['hat']
@@ -157,6 +167,12 @@ def draw_person(spec, view, frame):
         P(7, by - 1, hx('#ff9bbd'), False); P(7, by, hx('#ff9bbd'), False) if False else None
         P(7, by, hx('#e0b078'), False); P(7, by + 1, hx('#e0b078'), False)
         P(6, by - 1, hx('#ff9bbd'), False) if False else None
+    if spec['plush'] is not None and view == 'front':
+        pc = spec['plush']
+        for x in (2, 3, 4):
+            for k in (by, by + 1): P(x, k, pc, False)
+        P(2, by - 1, pc, False); P(4, by - 1, pc, False); P(3, by + 1, shade_col(pc, 1.25), False)
+        P(2, by, hx('#2a1f2d'), False); P(4, by, hx('#2a1f2d'), False)
     if spec['star']:
         sx, sy = 3, hy - 3
         for (dx, dy) in [(0, -1), (-1, 0), (0, 0), (1, 0), (0, 1)]:
@@ -209,7 +225,7 @@ def outline(sprite):
             if sp[x, y][3]: op[x + 1, y + 1] = sp[x, y]
     return out
 
-def visitor(spec, direction='SE', frame=0):
+def visitor(spec, direction='SE', frame=0, shadow=True):
     """hotový sprite s obrysem; kotva = střed pod nohama = (W//2+1, výška-1)"""
     view = 'front' if direction in ('SE', 'SW') else 'back'
     im = draw_person(spec, view, frame)
@@ -219,7 +235,15 @@ def visitor(spec, direction='SE', frame=0):
     bbox = im.getbbox()
     top = bbox[1]
     im = im.crop((0, top, W, H))
-    return outline(im)
+    sp = outline(im)
+    if shadow:
+        out = Image.new('RGBA', (sp.width, sp.height + 2), (0, 0, 0, 0))
+        d = ImageDraw.Draw(out)
+        cx = sp.width // 2
+        d.ellipse([cx - 4, sp.height - 2, cx + 4, sp.height + 1], fill=(40, 90, 40, 110))
+        out.alpha_composite(sp, (0, 0))
+        return out
+    return sp
 
 # kompatibilita se scénou zoo_art.make_scene2: person(shirt, pants, skin, kid=False, balloon=None, hat=None, seed=0)
 def person_compat(shirt, pants, skin, kid=False, balloon=None, hat=None, seed=0):
