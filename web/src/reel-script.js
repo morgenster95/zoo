@@ -54,11 +54,11 @@ export function plan(tl) {
   };
   // ---- příchody návštěvníků (zrychlují; každý přidá 10 mincí v okamžiku, kdy projde bránou)
   const arrivals = [];
-  let t = cue.visitor + 0.1, gap = 2.0, k = 0;
-  while (t < total - 5.2) {
+  let t = cue.visitor + 0.1, gap = 2.4, k = 0;
+  while (t < total - 7.5 && k < 13) {          // jen ilustrativně: pár návštěvníků, ne celý dav
     const w = walker(routeTo(k), t, 2.1);
     arrivals.push({ k, t0: t, walk: w, tGate: t + (4.5 - 1.4) / 2.1, look: hashString('r' + k) % 256 });
-    t += gap; gap = Math.max(0.55, gap * 0.8); k++;
+    t += gap; gap = Math.max(1.5, gap * 0.9); k++;
   }
   // ---- zebra, která uteče
   const pad = fenceOf(-1, -1);                                               // plot výběhu pro zebry
@@ -86,7 +86,7 @@ export function plan(tl) {
   // ---- mince: bilance v čase
   const events = [];
   const ledger = [{ t: 0, d: 0, v: 0 }];
-  arrivals.forEach((a) => { ledger.push({ t: a.tGate, d: 10, v: 1 }); events.push({ t: a.tGate, type: 'coin' }); });
+  arrivals.forEach((a, n) => { ledger.push({ t: a.tGate, d: 10, v: 1 }); if (n < 2) events.push({ t: a.tGate, type: 'coin' }); });   // cinká jen u prvních dvou, ať to neruší
   const tBuy = cue.fence + 0.15;
   ledger.push({ t: tBuy, d: -FENCE_COST, v: 0 }); events.push({ t: tBuy, type: 'thunk' });
   const tBus = cue.bus + 2.3;

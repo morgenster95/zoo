@@ -25,22 +25,39 @@ def resample(a, sr):
     if sr == SR: return a
     x = np.linspace(0, len(a) - 1, int(len(a) * SR / sr)); return np.interp(x, np.arange(len(a)), a).astype(np.float32)
 
+def ffmpeg_exe():
+    if os.environ.get('FFMPEG'): return os.environ['FFMPEG']
+    try:
+        import imageio_ffmpeg; return imageio_ffmpeg.get_ffmpeg_exe()
+    except Exception: return 'ffmpeg'
+
+def tts_line(text, voice, rate, pitch, mp3):
+    """edge-tts: vrací přesné časy slov (WordBoundary); text skriptu se posílá Microsoft službě jako u fronty"""
+    import asyncio, edge_tts
+    async def go():
+        words = []
+        comm = edge_tts.Communicate(text, voice, rate=rate, pitch=pitch, boundary='WordBoundary')
+        with open(mp3, 'wb') as f:
+            async for ch in comm.stream():
+                if ch['type'] == 'audio': f.write(ch['data'])
+                elif ch['type'] == 'WordBoundary': words.append({'w': ch['text'], 't0': ch['offset'] / 1e7, 't1': (ch['offset'] + ch['duration']) / 1e7})
+        return words
+    return asyncio.run(go())
+
 def voice(folder):
     sc = json.load(open(os.path.join(folder, 'script.json')))
     tmp = os.path.join(folder, 'tmp'); os.makedirs(tmp, exist_ok=True)
     t = sc.get('lead', 0.5); lines = []; chunks = []
     for k, ln in enumerate(sc['lines']):
-        aiff = os.path.join(tmp, f'l{k}.aiff'); wavf = os.path.join(tmp, f'l{k}.wav')
-        run(['say', '-v', sc.get('voice', 'Samantha'), '-r', str(sc.get('rate', 175)), '-o', aiff, ln['text']])
-        run(['afconvert', '-f', 'WAVE', '-d', f'LEI16@{SR}', '-c', '1', aiff, wavf])
+        mp3 = os.path.join(tmp, f'l{k}.mp3'); wavf = os.path.join(tmp, f'l{k}.wav')
+        words = tts_line(ln['text'], sc.get('voice', 'en-US-AvaNeural'), sc.get('rate', '+0%'), sc.get('pitch', '+0Hz'), mp3)
+        run([ffmpeg_exe(), '-y', '-v', 'error', '-i', mp3, '-ar', str(SR), '-ac', '1', wavf])
         a, sr = read_wav(wavf)
-        # ořez ticha na začátku a na konci
-        nz = np.where(np.abs(a) > 0.01)[0]
-        if len(nz): a = a[max(0, nz[0] - 200): nz[-1] + 400]
         dur = len(a) / SR
-        words = ln['text'].replace(',', '').replace('.', '').split()
-        lens = np.array([len(w) + 2 for w in words], float); cum = np.concatenate([[0], np.cumsum(lens)]) / lens.sum()
-        ws = [{'w': w, 't0': round(t + cum[i] * dur, 3), 't1': round(t + cum[i + 1] * dur, 3)} for i, w in enumerate(words)]
+        w0 = words[0]['t0'] if words else 0
+        ws = [{'w': w['w'], 't0': round(t + w['t0'] - w0, 3), 't1': round(t + w['t1'] - w0, 3)} for w in words]
+        a = a[int(max(0, w0 - 0.05) * SR):]
+        dur = len(a) / SR
         lines.append({'id': ln['id'], 'text': ln['text'], 'start': round(t, 3), 'end': round(t + dur, 3), 'words': ws, 'hold': ln.get('hold', 0)})
         chunks.append((t, a))
         t += dur + sc.get('gap', 0.3) + ln.get('hold', 0)
@@ -51,54 +68,67 @@ def voice(folder):
     json.dump({'lines': lines, 'total': round(total, 3)}, open(os.path.join(folder, 'timeline.json'), 'w'), indent=1)
     print(f"hlas hotov: {len(lines)} řádků, {total:.1f} s")
 
-# ---------------------------------------------------------------- hudba a efekty (syntéza)
-def sq(f, d, duty=0.5, sr=SR):
-    t = np.arange(int(d * sr)) / sr; ph = (t * f) % 1.0; return np.where(ph < duty, 1.0, -1.0).astype(np.float32)
-def tri(f, d, sr=SR):
-    t = np.arange(int(d * sr)) / sr; ph = (t * f) % 1.0; return (4 * np.abs(ph - 0.5) - 1).astype(np.float32)
-def env(n, a=0.005, r=0.1, sr=SR):
-    e = np.ones(n, np.float32); na = int(a * sr); nr = int(r * sr)
-    if na: e[:na] = np.linspace(0, 1, na)
-    if nr: e[-nr:] *= np.linspace(1, 0, min(nr, n))
-    return e
-def note(f, d, kind='sq', vol=0.3, duty=0.5):
-    w = sq(f, d, duty) if kind == 'sq' else tri(f, d); return w * env(len(w), 0.004, min(d * 0.6, 0.18)) * vol
+# ---------------------------------------------------------------- hudba a efekty (syntéza, jemná: sinusy, dozvuk, žádné čtvercové vlny)
 def mtof(m): return 440.0 * 2 ** ((m - 69) / 12)
 
-def music(total, bpm=116):
-    beat = 60.0 / bpm; out = np.zeros(int(total * SR) + SR, np.float32)
-    prog = [(48, [60, 64, 67]), (45, [57, 60, 64]), (41, [57, 60, 65]), (43, [55, 59, 62])]   # C Am F G
-    bar = beat * 4; t = 0.0; k = 0
+def bell(f, d, vol=0.2, harm=(1.0, 0.0, 0.28, 0.0, 0.08), decay=5.0):
+    n = int(d * SR); tt = np.arange(n) / SR
+    w = sum(h * np.sin(2 * np.pi * f * (k + 1) * tt) for k, h in enumerate(harm) if h) * np.exp(-tt * decay)
+    a = int(0.004 * SR); w[:a] *= np.linspace(0, 1, a)
+    return (w * vol).astype(np.float32)
+
+def pad(f, d, vol=0.05):
+    n = int(d * SR); tt = np.arange(n) / SR
+    w = (np.sin(2 * np.pi * f * tt) + 0.5 * np.sin(2 * np.pi * f * 1.004 * tt) + 0.25 * np.sin(2 * np.pi * f * 2 * tt)) / 1.75
+    e = np.minimum(1, tt / 0.6) * np.minimum(1, (d - tt) / 0.8)
+    return (w * e * vol).astype(np.float32)
+
+def echo(a, delay=0.32, gain=0.3, taps=3):
+    out = a.copy(); d = int(delay * SR)
+    for k in range(1, taps + 1):
+        g = gain ** k; out[k * d:] += a[: len(a) - k * d] * g
+    return out
+
+def music(total, bpm=92):
+    beat = 60.0 / bpm; bar = beat * 4
+    out = np.zeros(int(total * SR) + 4 * SR, np.float32)
+    prog = [(48, [60, 64, 67, 71]), (45, [57, 60, 64, 67]), (41, [57, 60, 65, 69]), (43, [55, 59, 62, 67])]   # Cmaj7, Am7, Fmaj7, G
+    scale = [0, 2, 4, 7, 9]
+    rng = np.random.RandomState(7)
+    t = 0.0; k = 0
     while t < total:
         root, ch = prog[k % 4]
-        for s in range(8):                               # arpeggio osminy
-            n = mtof(ch[s % 3] + (12 if s % 4 == 3 else 0)); st = t + s * beat / 2
-            w = note(n, beat / 2 * 0.9, 'sq', 0.07, 0.25); i = int(st * SR); out[i:i + len(w)] += w[: len(out) - i]
-        for b in range(2):                               # basa
-            w = note(mtof(root - 12 + (7 if b else 0)), beat * 1.8, 'tri', 0.18); i = int((t + b * 2 * beat) * SR); out[i:i + len(w)] += w[: len(out) - i]
+        for m in ch:                                            # měkký pad
+            w = pad(mtof(m - 12), bar + 0.6); i = int(t * SR); out[i:i + len(w)] += w[: len(out) - i]
+        w = bell(mtof(root - 12), bar * 0.9, 0.10, (1.0, 0.0, 0.0), 1.6); i = int(t * SR); out[i:i + len(w)] += w[: len(out) - i]      # basa
+        for s in range(8):                                      # jemné „marimba“ tóny, řídce
+            if rng.rand() < 0.55:
+                nn = 72 + root % 12 + scale[rng.randint(0, 5)] - 12 + (12 if rng.rand() < 0.3 else 0)
+                w = bell(mtof(nn), 0.9, 0.07, (1.0, 0.0, 0.22), 4.2); i = int((t + s * beat / 2) * SR); out[i:i + len(w)] += w[: len(out) - i]
         t += bar; k += 1
-    return out
+    out = echo(out, 0.375, 0.32, 3)
+    return out[: int(total * SR) + SR]
 
 def sfx(kind):
     if kind == 'coin':
-        return np.concatenate([note(988, 0.07, 'sq', 0.22, 0.5), note(1319, 0.16, 'sq', 0.22, 0.5)])
+        return np.concatenate([bell(988, 0.12, 0.12, (1, 0, 0.2), 9), bell(1319, 0.3, 0.12, (1, 0, 0.2), 6)])
     if kind == 'pop':
-        d = 0.14; n = int(d * SR); t = np.arange(n) / SR; f = 700 * np.exp(-t * 14); w = np.sin(2 * np.pi * np.cumsum(f) / SR) * env(n, 0.002, 0.1) * 0.35
+        d = 0.16; n = int(d * SR); tt = np.arange(n) / SR; f = 520 * np.exp(-tt * 9); w = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-tt * 18) * 0.28
         return w.astype(np.float32)
     if kind == 'thunk':
-        d = 0.16; n = int(d * SR); t = np.arange(n) / SR; w = np.sin(2 * np.pi * 95 * t) * np.exp(-t * 22) * 0.6 + (np.random.RandomState(1).rand(n) - .5) * np.exp(-t * 60) * 0.3
+        d = 0.3; n = int(d * SR); tt = np.arange(n) / SR; w = np.sin(2 * np.pi * 80 * tt) * np.exp(-tt * 14) * 0.45
         return w.astype(np.float32)
     if kind == 'tick':
-        return note(1500, 0.03, 'sq', 0.16, 0.25)
+        return bell(620, 0.07, 0.10, (1.0, 0.0, 0.5), 45)       # dřevěné klepnutí
     if kind == 'honk':
-        return np.concatenate([note(330, 0.16, 'sq', 0.26, 0.5), np.zeros(int(0.04 * SR), np.float32), note(392, 0.22, 'sq', 0.26, 0.5)])
+        return np.concatenate([bell(392, 0.22, 0.14, (1, 0.4, 0.3), 3.5), np.zeros(int(0.05 * SR), np.float32), bell(494, 0.34, 0.14, (1, 0.4, 0.3), 3.0)])
     if kind == 'spark':
-        return np.concatenate([note(mtof(m), 0.07, 'sq', 0.14, 0.25) for m in (84, 88, 91, 96)])
+        return np.concatenate([bell(mtof(m), 0.25, 0.07, (1, 0, 0.15), 8) for m in (84, 88, 91)]) if False else sum(np.pad(bell(mtof(m), 0.4, 0.07, (1, 0, 0.15), 7), (int(k * 0.07 * SR), 0))[:int(0.8 * SR)] if False else 0 for k, m in enumerate((84, 88, 91))) or np.concatenate([bell(mtof(84), 0.18, 0.07, (1, 0, 0.15), 8), bell(mtof(88), 0.18, 0.07, (1, 0, 0.15), 8), bell(mtof(91), 0.4, 0.07, (1, 0, 0.15), 6)])
     if kind == 'boing':
-        d = 0.35; n = int(d * SR); t = np.arange(n) / SR; f = 300 + 250 * np.sin(2 * np.pi * 6 * t) * np.exp(-t * 5); w = np.sign(np.sin(2 * np.pi * np.cumsum(f) / SR)) * env(n, 0.005, 0.2) * 0.22
+        d = 0.4; n = int(d * SR); tt = np.arange(n) / SR; f = 330 + 220 * np.sin(2 * np.pi * 5 * tt) * np.exp(-tt * 4); w = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-tt * 5) * 0.2
         return w.astype(np.float32)
     if kind == 'whoosh':
-        d = 0.5; n = int(d * SR); r = np.random.RandomState(2).rand(n) - .5; k = np.ones(40) / 40; w = np.convolve(r, k, 'same') * np.hanning(n) * 1.4
+        d = 0.7; n = int(d * SR); r = np.random.RandomState(2).rand(n) - .5; k = np.ones(120) / 120; w = np.convolve(r, k, 'same') * np.hanning(n) * 1.1
         return w.astype(np.float32)
     return np.zeros(10, np.float32)
 
@@ -107,7 +137,7 @@ def mix(folder):
     ev = json.load(open(os.path.join(folder, 'events.json'))) if os.path.exists(os.path.join(folder, 'events.json')) else []
     voice_a, _ = read_wav(os.path.join(folder, 'voice.wav'))
     out = np.zeros(int(total * SR) + SR, np.float32)
-    out += music(total)[: len(out)]
+    out += music(total)[: len(out)] * 0.8
     out[: len(voice_a)] += voice_a[: len(out)] * 1.0
     for e in ev:
         w = sfx(e['type']); i = int(e['t'] * SR)

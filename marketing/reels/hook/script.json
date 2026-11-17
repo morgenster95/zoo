@@ -1,15 +1,56 @@
 {
-  "title": "Hook: Day 1 of the zoo (kopie struktury vzorového virálního videa)",
-  "voice": "Samantha", "rate": 178, "gap": 0.32, "lead": 0.6, "tail": 2.6,
-  "lines": [
-    { "id": "intro",  "text": "Welcome to day one of the zoo that only grows when you follow.", "hold": 0.2 },
-    { "id": "visitor", "text": "Every follower becomes a visitor.", "hold": 0.9 },
-    { "id": "coins",  "text": "And every visitor brings ten coins.", "hold": 0.6 },
-    { "id": "poor",   "text": "But we are poor. One zebra paddock, one flamingo puddle, and no fence.", "hold": 0.4 },
-    { "id": "escape", "text": "One escaped zebra, and the zoo is over.", "hold": 0.8 },
-    { "id": "fence",  "text": "So we spent two hundred of our five hundred coins on a fence.", "hold": 2.2 },
-    { "id": "vote",   "text": "Now you decide what we build next. The most liked comment wins.", "hold": 3.0 },
-    { "id": "bus",    "text": "And every share sends a school bus with twenty coins.", "hold": 1.6 },
-    { "id": "cta",    "text": "What should we call our zoo? Follow to visit.", "hold": 0.0 }
-  ]
+ "title": "Hook: Day 1 of the zoo (kopie struktury vzorov\u00e9ho vir\u00e1ln\u00edho videa)",
+ "voice": "en-US-AvaNeural",
+ "rate": "+4%",
+ "gap": 0.32,
+ "lead": 0.6,
+ "tail": 2.6,
+ "lines": [
+  {
+   "id": "intro",
+   "text": "Welcome to day one of the zoo that only grows when you follow.",
+   "hold": 0.2
+  },
+  {
+   "id": "visitor",
+   "text": "Every follower becomes a visitor.",
+   "hold": 0.9
+  },
+  {
+   "id": "coins",
+   "text": "And every visitor brings ten coins.",
+   "hold": 0.6
+  },
+  {
+   "id": "poor",
+   "text": "But we are poor. One alpaca paddock, one flamingo puddle, and no fence.",
+   "hold": 0.4
+  },
+  {
+   "id": "escape",
+   "text": "One escaped alpaca, and the zoo is over.",
+   "hold": 0.8
+  },
+  {
+   "id": "fence",
+   "text": "So we spent two hundred of our five hundred coins on a fence.",
+   "hold": 2.2
+  },
+  {
+   "id": "vote",
+   "text": "Now you decide what we build next. The most liked comment wins.",
+   "hold": 3.0
+  },
+  {
+   "id": "bus",
+   "text": "And every share sends a school bus with twenty coins.",
+   "hold": 1.6
+  },
+  {
+   "id": "cta",
+   "text": "What should we call our zoo? Follow to visit.",
+   "hold": 0.0
+  }
+ ],
+ "pitch": "+0Hz"
 }
