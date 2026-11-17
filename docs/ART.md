@@ -19,6 +19,11 @@ My držíme **pohled a hustotu**, měníme **náladu**: světlé, sytě zelené,
 tvary v nativním rozlišení, automatický obrys, stínování, pak zvětšení 3× bez vyhlazení. Styl sedí na veselou zoo, zvládám ho konzistentně.
 Slabší místa: detailní zvířata (slon, žirafa jsou čitelní, ale jednoduší než ruční pixel art), animace chůze.
 
+**Zkouška v2 (17. 11. 2026, `art/proto/zoo_art.py`, výstupy `art/proto/styles/`):** tři styly na stejné scéně (budovy z izometrických boxů se sedlovou střechou a šindelem,
+věž, kupole, kolotoč, iglú, texturovaná tráva/cesta/dlažba, hustá zeleň, stovky návštěvníků). `A_reference` = nejvěrnější referenci (tmavší, sytá, silný obrys),
+`B_playful` = světlý cukrový, `C_hybrid` = struktura reference + světlejší barvy. Styl se přepíná slovníkem `STYLES`.
+Slabiny: zvířata jsou jednodušší než budovy, žádné animace, budovy mají jen jednu orientaci a málo detailů (okna, dveře, truhlíky).
+
 Plán:
 - **Kulisy, zvířata, budovy, terén:** vlastní generace (kód) nebo PixelLab (`create_object_pro_flash`, izometrie) – podle toho, co vypadá lépe; vždy s paletou výše.
 - **Návštěvníci (stovky variant, chůze 4–8 směrů):** PixelLab `create_character` + animace (postup z fronty: `tools/pixellab.py`, ledger proti duplikátům, `sprite_qa.py`). Generace jsou omezené, proto jednou správně.
