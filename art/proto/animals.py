@@ -27,6 +27,10 @@ R = dict(
   pen=ramp('#6b7699', '#4c5678', '#38405f', '#2a3050'),
   mon=ramp('#c68a5a', '#a86e42', '#855230', '#653c22'),
   tan=ramp('#ffe9c4', '#f6d3a0', '#e3b378', '#c98f58'),
+  ele_ear=ramp('#cfd6ee', '#a9b4d6', '#8793bb', '#6d799f'),
+  rhi=ramp('#e0dce6', '#bdb7c9', '#9a94ab', '#7a758c'),
+  bear=ramp('#b98660', '#96653f', '#744a2c', '#563620'),
+  shell=ramp('#8fd36a', '#5fb44a', '#43923a', '#2f722e'),
   white=ramp('#ffffff', '#fff8ee', '#e6dfe8', '#cbc4d4'),
   pink=ramp('#ffd0dc', '#f9aabf', '#e68aa6', '#c96b88'),
 )
@@ -151,10 +155,10 @@ def elephant():
     c.line([(43, 23), (45, 28), (45, 33), (42, 37)], 5.2, rp=r, depth=2)
     for yy in (27, 30, 33):
         c.overlay(lambda d, s, yy=yy: d.line([(s(42), s(yy)), (s(47), s(yy))], fill=255), r[2])
-    c.blob(32, 18, 6.5, 9, r, tilt=.12)                         # ucho
+    c.blob(32, 18, 6.5, 9, R['ele_ear'], tilt=.12)              # ucho
     c.blob(32.5, 18.5, 4, 6.5, R['pink'], tilt=.12, flat=hx('#f7b5c6'))
     c.blob(32, 17, 3.6, 5.5, R['pink'], tilt=.12, flat=hx('#fbc8d6'))
-    c.line([(43, 24), (47, 26), (48, 24)], 2, flat=hx('#fff6e4'))
+    c.line([(43, 24), (47, 27)], 1.6, flat=hx('#fff6e4'))
     c.eye(42, 15); c.blush(41, 20)
     return c.done()
 
@@ -195,7 +199,7 @@ def zebra():
     c.blush(31, 9, hx('#f6a8bf'))
     for xx in range(7, 25, 4):
         c.overlay(lambda d, s, xx=xx: d.polygon([(s(xx), s(10)), (s(xx + 1.2), s(10)), (s(xx - 1.8), s(24)), (s(xx - 3), s(24))], fill=255), k)
-    for (a, b) in [(25, 14), (28, 11), (30, 8)]:
+    for (a, b) in [(25, 14), (29, 10)]:
         c.overlay(lambda d, s, a=a, b=b: d.line([(s(a), s(b + 3)), (s(a + 4), s(b - 1))], fill=255, width=max(1, int(K))), k)
     for yy in (25, 28):
         for lx in (7, 9, 24, 26):
@@ -208,6 +212,7 @@ def lion():
     c.blob(14, 16, 11, 6.5, r)
     c.limb(4, 18, 8, 28, 4, r); c.limb(19, 18, 23, 28, 4, r)
     c.line([(3, 13), (0, 18), (1, 24)], 1.4, flat=r[2]); c.blob(1, 25, 2, 2.6, m, flat=m[2])
+    c.blob(27, 17, 7, 6, m)                                    # hříva na hrudi
     c.blob(28, 12, 9.5, 9.5, m)
     c.blob(30, 14.5, 5.5, 5, r)
     c.blob(34, 17, 3.2, 2.5, R['tan'])
@@ -304,14 +309,67 @@ def monkey():
     c.blob(10, 20, 3, 3.4, R['tan'])
     return c.done()
 
+
+def rhino():
+    c = Cv(48, 30); r = R['rhi']
+    c.limb(10, 18, 16, 27, 5, r, far=True); c.limb(28, 18, 34, 27, 5, r, far=True)
+    c.blob(21, 16, 16, 9, r)
+    c.limb(7, 18, 13, 28, 5.5, r); c.limb(26, 18, 32, 28, 5.5, r)
+    c.line([(5, 12), (3, 18)], 1.3, flat=r[2])
+    c.blob(37, 17, 8.5, 7, r, tilt=.12)
+    c.blob(43, 20, 4.5, 4, r)
+    c.poly([(40, 14), (44, 5), (45, 15)], ramp('#fff6e4', '#f1dcb4', '#d8bd8a', '#b89a68'))   # roh
+    c.poly([(36, 12), (38, 8), (39, 13)], flat=hx('#e6d2a8'))
+    c.blob(32, 10, 2.4, 3, r, tilt=-.3); c.eye(37, 14); c.px(45, 20, hx('#4a3a4a')); c.px(44, 19, hx('#4a3a4a'))
+    c.line([(38, 22), (46, 22)], 1.0, flat=hx('#6a5a74'))
+    c.blush(35, 18, hx('#f2a0c0'))
+    return c.done()
+
+def bear():
+    c = Cv(40, 32); r = R['bear']
+    c.limb(8, 19, 13, 29, 5, r, far=True); c.limb(24, 19, 29, 29, 5, r, far=True)
+    c.blob(17, 17, 12.5, 8, r)
+    c.limb(6, 20, 11, 30, 5, r); c.limb(22, 20, 27, 30, 5, r)
+    c.blob(4, 14, 2.2, 2.2, r)
+    c.blob(30, 15, 7.2, 6.8, r)
+    c.blob(35, 18, 3.6, 3, R['tan'])
+    c.px(37, 17, hx('#2a1f2d')); c.px(38, 17, hx('#2a1f2d')); c.px(36, 20, hx('#6a3a3a'))
+    c.blob(25, 9, 2.6, 2.6, r); c.blob(33, 8.5, 2.6, 2.6, r)
+    c.blob(25, 9, 1.2, 1.2, R['tan']); c.blob(33, 8.5, 1.2, 1.2, R['tan'])
+    c.eye(32, 13); c.blush(30, 18)
+    return c.done()
+
+def turtle():
+    c = Cv(26, 16); r = R['shell']; sk = ramp('#d9e8a0', '#bcd477', '#98b457', '#7a9440')
+    c.blob(21, 9, 3.2, 2.8, sk)
+    c.blob(5, 13, 2.4, 1.8, sk); c.blob(17, 13, 2.4, 1.8, sk)
+    c.blob(12, 8, 9.5, 6, r)
+    for (x, y) in [(9, 6), (14, 5.5), (12, 9), (7, 9.5), (17, 9.5)]:
+        c.overlay(lambda d, s, x=x, y=y: d.ellipse([s(x - 1.6), s(y - 1.2), s(x + 1.6), s(y + 1.2)], outline=255), r[3])
+    c.eye(22, 8); c.blush(21, 10)
+    return c.done()
+
+ANIMALS_EXTRA = [('rhino', rhino), ('bear', bear), ('turtle', turtle)]
+ANIMAL_K = dict(giraffe=0.76, elephant=0.9, hippo=0.9, rhino=0.9, penguin=1.0, flamingo=0.95)
+
+def _wrap(fn, k):
+    def f():
+        global K
+        old = K; K = k
+        try: return fn()
+        finally: K = old
+    f.__name__ = fn.__name__
+    return f
+
 ANIMALS = [('elephant', elephant), ('giraffe', giraffe), ('zebra', zebra), ('lion', lion), ('tiger', tiger),
-           ('panda', panda), ('hippo', hippo), ('flamingo', flamingo), ('penguin', penguin), ('monkey', monkey)]
+           ('panda', panda), ('hippo', hippo), ('flamingo', flamingo), ('penguin', penguin), ('monkey', monkey)] + ANIMALS_EXTRA
+ANIMALS = [(n, _wrap(f, ANIMAL_K.get(n, 0.9))) for n, f in ANIMALS]
 
 def sheet(scale=5):
     items = [(n, f()) for n, f in ANIMALS]
     pad = 10
     W = sum(im.width * 2 + pad * 3 for _, im in items) // 2 + pad
-    cols = 5
+    cols = 7
     cellw = max(im.width for _, im in items) * 2 + 3 * pad
     cellh = max(im.height for _, im in items) + 2 * pad
     sh = Image.new('RGBA', (cols * cellw, 2 * cellh), za.S['grass'][0])
@@ -339,7 +397,7 @@ def scene_with_new_animals(out):
     """scéna stylu C s novými zvířaty (přepíše staré funkce v zoo_art)"""
     za.load_style('C_hybrid')
     for n in ('elephant', 'giraffe', 'zebra', 'lion', 'panda', 'flamingo', 'penguin'):
-        setattr(za, n, globals()[n])
+        setattr(za, n, dict(ANIMALS)[n])
     sc = za.make_scene2()
     sc = za.tone(sc, za.S['sat'], za.S['bright']); za.hud(sc, None)
     sc.resize((sc.width * 3, sc.height * 3), Image.NEAREST).save(out)
