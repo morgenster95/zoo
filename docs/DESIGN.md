@@ -47,3 +47,17 @@ Jádro mapy ve frontě je 2D shora (dlaždice 16 px); zoo chceme **izometricky 2
 - Jazyk (fronta je anglicky pro USA/UK; zoo také?).
 - Zóny: 4 (SAVANA, JUNGLE, ARCTIC, OCEAN) nebo jedna zoo bez soupeření?
 - Zda nechat „závod“ mezi zónami, nebo jen společné odemykání (příjemnější pro komunitu, žádný „poražený“).
+
+## Výchozí pozice a ekonomika (rozhodnuto 17. 11. 2026)
+
+**Start = absolutně malá, chudá zoo** (`art/proto/mini_zoo.py`, ukázka `art/proto/styles/mini_zoo_start.png`): chudá dřevěná brána, kasa, jeden výběh se 2 zebrami, loužička s 2 plameňáky,
+2 lavičky, bedny, seno, plevel, hodně holé hlíny a **3 prázdné parcely** (kolíky s provazem a cedulí „?“), kam se bude stavět podle hlasování.
+
+**Kasa u vstupu ukazuje mince.** Pravidlo: **každý návštěvník (follower) = 10 mincí.** Zůstatek = 10 × (počet návštěvníků) − utraceno za stavby.
+Nová stavba se zaplatí z mincí; hlasování určuje, CO se postaví, mince, ČÍM se zaplatí. Ceny jsou k doladění (první návrh):
+lavička 20, stánek 150, kavárna 300, malý výběh 500, velký výběh 1 000, nové zvíře 200–1 500, okrasná stavba 400.
+Mince se nikdy nevracejí na 0 a nikdo o ně nepřijde (follower, který odejde, mince nesebere).
+
+**Rodiny budov** (`styles/building_families.png`): `classic` (hrázděný dům, výchozí), `modern` (plochá střecha, prosklení, dřevěné lamely, solární panely),
+`african` (kulatá chýše se slaměnou střechou a bílým vzorem), `asian` (pagoda), `andes` (stupňovitá barevná stavba). Výběh dostane rodinu podle zvířat (savana = africká, panda = asijská atd.),
+moderní pro zázemí (kavárna, obchod, vstup po rozšíření). Starší dřevěné budovy zůstávají pro chudý začátek.
