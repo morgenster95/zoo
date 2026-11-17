@@ -93,29 +93,29 @@ def echo(a, delay=0.32, gain=0.3, taps=3):
         g = gain ** k; out[k * d:] += a[: len(a) - k * d] * g
     return out
 
-def music(total, bpm=112):
+def music(total, bpm=108):
+    """veselá, lehká hudba: durová smyčka C–G–Am–F, pizzicato basa, „ukulele“ na odbočky, jednoduchá marimba melodie, tichý shaker; krátký dozvuk"""
     beat = 60.0 / bpm; bar = beat * 4
     out = np.zeros(int(total * SR) + 4 * SR, np.float32)
-    prog = [(48, [60, 64, 67, 71]), (45, [57, 60, 64, 67]), (41, [57, 60, 65, 69]), (43, [55, 59, 62, 67])]   # Cmaj7, Am7, Fmaj7, G
-    scale = [0, 2, 4, 7, 9]
-    rng = np.random.RandomState(7)
+    prog = [(48, [60, 64, 67]), (43, [59, 62, 67]), (45, [57, 60, 64]), (41, [57, 60, 65])]          # C, G, Am, F
+    motif = [[76, 79, 81, 79, 76, 74, 72, 74], [79, 83, 86, 83, 79, 78, 74, 78], [81, 84, 88, 84, 81, 79, 76, 79], [77, 81, 84, 81, 79, 77, 74, 77]]
+    rng = np.random.RandomState(3)
     t = 0.0; k = 0
+    def add(w, st):
+        i = int(st * SR); out[i:i + len(w)] += w[: len(out) - i]
     while t < total:
         root, ch = prog[k % 4]
-        for m in ch:                                            # měkký pad
-            w = pad(mtof(m - 12), bar + 0.6); i = int(t * SR); out[i:i + len(w)] += w[: len(out) - i]
-        w = bell(mtof(root - 12), bar * 0.9, 0.10, (1.0, 0.0, 0.0), 1.6); i = int(t * SR); out[i:i + len(w)] += w[: len(out) - i]      # basa
-        for s in range(8):                                      # jemné „marimba“ tóny, řídce
-            if rng.rand() < 0.55:
-                nn = 72 + root % 12 + scale[rng.randint(0, 5)] - 12 + (12 if rng.rand() < 0.3 else 0)
-                w = bell(mtof(nn), 0.9, 0.07, (1.0, 0.0, 0.22), 4.2); i = int((t + s * beat / 2) * SR); out[i:i + len(w)] += w[: len(out) - i]
-        for b in range(4):                                      # jemný rytmus: měkký buben na doby a tichý klik mezi nimi
-            tt = np.arange(int(0.18 * SR)) / SR
-            kick = (np.sin(2 * np.pi * 62 * np.exp(-tt * 9) * tt) * np.exp(-tt * 16) * (0.20 if b % 2 == 0 else 0.11)).astype(np.float32)
-            i = int((t + b * beat) * SR); out[i:i + len(kick)] += kick[: len(out) - i]
-            w = bell(1800, 0.05, 0.035, (1.0, 0.0, 0.0), 60); i = int((t + b * beat + beat / 2) * SR); out[i:i + len(w)] += w[: len(out) - i]
+        for b_ in range(4):                                     # poskakující basa: kořen, kvinta
+            add(bell(mtof(root - 12 + (7 if b_ % 2 else 0)), 0.35, 0.16, (1.0, 0.0, 0.1), 9), t + b_ * beat)
+        for s in range(8):                                      # „ukulele“ akord na odbočky + marimba melodie
+            st = t + s * beat / 2
+            if s % 2 == 1:
+                for m in ch: add(bell(mtof(m), 0.2, 0.035, (1.0, 0.5, 0.25), 18), st)
+            if k % 4 != 3 or s < 6:
+                add(bell(mtof(motif[k % 4][s] - (12 if k >= 0 else 0)), 0.45, 0.06, (1.0, 0.0, 0.3), 7), st)
+            n = int(0.04 * SR); sh = (rng.rand(n) - 0.5) * np.exp(-np.arange(n) / SR * 90) * 0.03; add(sh.astype(np.float32), st)   # shaker
         t += bar; k += 1
-    out = echo(out, 0.27, 0.28, 3)
+    out = echo(out, 0.19, 0.22, 2)
     return out[: int(total * SR) + SR]
 
 def sfx(kind):
@@ -146,7 +146,7 @@ def mix(folder):
     ev = json.load(open(os.path.join(folder, 'events.json'))) if os.path.exists(os.path.join(folder, 'events.json')) else []
     voice_a, _ = read_wav(os.path.join(folder, 'voice.wav'))
     out = np.zeros(int(total * SR) + SR, np.float32)
-    out += music(total)[: len(out)] * 0.8
+    out += music(total)[: len(out)] * 0.55
     out[: len(voice_a)] += voice_a[: len(out)] * 1.0
     for e in ev:
         w = sfx(e['type']); i = int(e['t'] * SR)

@@ -171,7 +171,7 @@ function buildEntrance() {
   boardSprite.zIndex = 99999;
   objects.addChild(boardSprite);
   setBoard(zoo.coins);
-  prop('d_bench_wood', -1.8, 1.5, 1); prop('d_bench_green', 2.0, 1.5, 1); prop('d_lamp', -1.5, -1.5, 1); prop('d_lamp', 2.5, -1.4, 1); prop('d_bin', 2.6, 0.9, 1);
+  prop('d_bench_wood', -1.8, 1.5, 1); prop('d_bench_green', 2.0, 1.5, 1); prop('d_lamp', -0.45, 4.3, 1); prop('d_lamp', 1.45, 3.1, 1);   // lampy u cestičky, ne ve výbězích prop('d_bin', 2.6, 0.9, 1);
   prop('tuft', 2.0, 3.0, 1); prop('flowers', -4.1, 5.3, 1); prop('tuft', 4.4, 5.2, 1); prop('pine1', -5.6, 4.8, 1);
 }
 function setBoard(coins) {
