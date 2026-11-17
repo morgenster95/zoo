@@ -16,3 +16,7 @@ Pravidla světa: mapa je nekonečná mřížka, silnice každých 6 dlaždic, pa
 Před změnou grafiky: `npm run assets` a ověřit měřítko (`art/proto/styles/scale_check_visitors_vs_animals.png`). Preview: `.claude/launch.json` → zoo-dev.
 Pozor: v prohlížeči Claude se při skrytém panelu zpomalí `requestAnimationFrame`, výkon měřit přes `app.ticker.update()` v JS, ne podle fps.
 Další kroky: Instagram (follower count → návštěvníci, komentář = převzetí jména), denní tah a noviny, hlasování o stavbách, Cloudflare nasazení.
+
+## Umístění staveb na mapě (pravidlo)
+Sprite má kotvu v předním rohu základny. Aby stál ve středu parcely (`ci, cj`), dáváme přední roh do `střed + w/64` na obou osách (`placeCentered` v `web/src/main.js`, w = šířka spritu). Plot výběhu je 4×4 dílky vystředěný v bloku 5×5 (po 0,5 dílku od silnic). Domek výběhu stojí vzadu (`střed − 0,8`), zvířata před ním. Pokladna stojí vedle cesty (`KI 4,2; KJ GATE_J+1,7`).
+Ladění: `http://localhost:5173/?debug=lots` vykreslí hranice parcel a středy.
