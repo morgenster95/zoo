@@ -8,7 +8,7 @@ import json, os, sys, random
 from PIL import Image
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-import zoo_art as za, animals, visitors, mini_zoo as mz
+import zoo_art as za, animals, visitors, mini_zoo as mz, vegetation as veg
 from zoo_art import hx
 
 OUT = os.path.join(HERE, '..', '..', 'web', 'public', 'assets')
@@ -56,7 +56,9 @@ def add(name, im, anchor=None):
     props[name] = (im, anchor or (im.width // 2, im.height - 2))
 
 for n, f in animals.ANIMALS: add('a_' + n, f())
-add('tree_round', za.tree_round(), (14, 33)); add('tree_pine', za.tree_pine(), (11, 33)); add('bush', za.bush(), (8, 9))
+for n, f in veg.ALL:
+    im = f()
+    add(n, im, (im.width // 2, im.height - 4 if n not in ('flowers', 'tuft', 'bush1', 'bush2', 'reeds') else im.height - 2))
 for n, fn in [('gate', mz.gate_poor), ('bench', mz.bench), ('crate', mz.crate), ('hay', mz.hay), ('weeds', mz.weeds), ('q_sign', mz.question_sign), ('plot', mz.stake_plot)]:
     im, a = fn(); add(n, im, a)
 im, a = mz.sign_board('WELCOME'); add('sign_welcome', im, a)

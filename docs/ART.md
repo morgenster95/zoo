@@ -61,6 +61,12 @@ Zvíře v kohoutku je výškou po hřbet zhruba jako dospělý, slon ~2×, žira
 Kontrola: `styles/scale_check_visitors_vs_animals.png` (dva návštěvníci a všech 13 zvířat vedle sebe). Při přidání nového zvířete ho vždy porovnat s tímhle obrázkem.
 Parcely k zastavění jsou ploché (vyšlapaná zem, čárkovaný obrys, pásky v rozích) a cedule „?“ je před nimi, bez kůlů.
 
+## Vegetace (v2, `art/proto/vegetation.py`)
+
+Staré stromy (kulička a smrček) nahrazeny malovanými: kupy listí se stínováním a vnitřním obrysem, kůra, stín na zemi (renderer z `painted.py`).
+Druhy: 3 duby, smrk, bříza, palma, akácie, baobab, bambus, třešeň, 2 keře, květiny, rákosí, trs trávy. Palma, akácie, baobab (savana), bambus a třešeň (Asie) jsou připravené pro rodiny výběhů.
+V mapě: louky mají mix (30 % stromy, jinak keře/květiny/tráva), okraj je řídký les, před bránou volno, rybníček má rákosí. Arch: `styles/vegetation_sheet.png`.
+
 Plán:
 - **Kulisy, zvířata, budovy, terén:** vlastní generace (kód) nebo PixelLab (`create_object_pro_flash`, izometrie) – podle toho, co vypadá lépe; vždy s paletou výše.
 - **Návštěvníci (stovky variant, chůze 4–8 směrů):** PixelLab `create_character` + animace (postup z fronty: `tools/pixellab.py`, ledger proti duplikátům, `sprite_qa.py`). Generace jsou omezené, proto jednou správně.

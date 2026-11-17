@@ -101,11 +101,16 @@ function fenceRect(i0, j0, i1, j1, gaps = []) {
   for (let j = j0 + 1; j < j1; j++) for (const i of [i0, i1]) prop('post' + ((i + j) & 1), i, j, 3);
 }
 
+const TREES = ['oak1', 'oak2', 'oak3', 'pine1', 'birch'];
+const SMALL = ['bush1', 'bush2', 'flowers', 'tuft', 'flowers', 'tuft'];
+function pickDecor(rng) { return rng() < 0.3 ? TREES[Math.floor(rng() * TREES.length)] : SMALL[Math.floor(rng() * SMALL.length)]; }
+
 function buildLots() {
   for (const { a, b } of lotsIn(R)) {
     const key = lotKey(a, b), lot = lots[key], bx = lotBox(a, b), rng = rngFor('lot', key);
     if (lot && (lot.t === 'paddock' || lot.t === 'pond')) {
       fenceRect(bx.i0, bx.j0, bx.i1, bx.j1);
+      if (lot.t === 'pond') { prop('reeds', bx.ci - 1.6, bx.cj + 1.4, 3); prop('reeds', bx.ci + 1.7, bx.cj - 1.3, 1); }
       (lot.animals || []).forEach((an, k) => {
         const p = lot.t === 'pond' ? [bx.ci - 0.7 + k * 1.1, bx.cj - 0.4 + k * 0.9] : [bx.i0 + 0.9 + rng() * (bx.i1 - bx.i0 - 1.8), bx.j0 + 0.9 + rng() * (bx.j1 - bx.j0 - 1.8)];
         const s = prop('a_' + an, p[0], p[1], 1);
@@ -118,11 +123,10 @@ function buildLots() {
       prop(lot.sprite, bx.ci + 1, bx.cj + 1, 1);
     } else {
       // volná louka: pár stromů, keřů a plevele (hustota klesá s růstem zoo)
-      const n = 2 + Math.floor(rng() * 3);
+      const n = 3 + Math.floor(rng() * 3);
       for (let k = 0; k < n; k++) {
         const i = bx.i0 + 0.5 + rng() * (bx.i1 - bx.i0 - 1), j = bx.j0 + 0.5 + rng() * (bx.j1 - bx.j0 - 1);
-        const r = rng();
-        prop(r < 0.45 ? 'tree_round' : r < 0.7 ? 'tree_pine' : r < 0.85 ? 'bush' : 'weeds', i, j, 1);
+        prop(pickDecor(rng, i, j), i, j, 1);
       }
     }
   }
@@ -134,7 +138,8 @@ function buildBorder() {
   const i0 = -BLOCK * R - M, i1 = BLOCK * R + M, j0 = -BLOCK * R - M, j1 = GATE_J + M;
   for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) {
     if (inRegion(i, j, R) || rng() > 0.07) continue;
-    prop(rng() < 0.6 ? 'tree_round' : 'tree_pine', i + rng(), j + rng(), 1);
+    if (j > GATE_J && j < GATE_J + 6 && Math.abs(i) < 9) continue;   // prostranství před bránou zůstane volné
+    prop(TREES[Math.floor(rng() * TREES.length)], i + rng(), j + rng(), 1);
   }
 }
 
@@ -150,7 +155,7 @@ function buildEntrance() {
   objects.addChild(boardSprite);
   setBoard(zoo.coins);
   prop('bench', -1.6, 1.4, 1); prop('bench', 1.8, 1.4, 1);
-  prop('weeds', 2.0, 3.0, 1); prop('weeds', -4.1, 5.3, 1); prop('weeds', 4.4, 5.2, 1);
+  prop('tuft', 2.0, 3.0, 1); prop('flowers', -4.1, 5.3, 1); prop('tuft', 4.4, 5.2, 1); prop('pine1', -5.6, 4.8, 1);
 }
 function setBoard(coins) {
   const t = Texture.from(boardCanvas(font, coins)); t.source.scaleMode = 'nearest';
