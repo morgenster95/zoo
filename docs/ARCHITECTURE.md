@@ -34,3 +34,10 @@ Potřebujeme od uživatele: Cloudflare účet (Pages, R2, Workers, D1), doménu,
 - `news/DDD.json` – noviny dne, `map/open.json` – otevřené sektory a odemčené stavby.
 - Cache: dávky `max-age=60`, kód/obrázky `immutable`.
 - Testovací data: `npm run data:fake` (4 000–10 000 návštěvníků), měřit paměť a načtení na mobilu.
+
+## Stav implementace (17. 11. 2026)
+
+Hotovo: statický web + data po dávkách (viz README). `VITE_DATA_BASE` přepíná odkud web čte data (výchozí `/data`, později R2).
+Rozložení souborů, které web stahuje: `zoo.json` (malé, jen souhrn a obsah parcel), `looks/N.bin` (4 096 vzhledů po 2 bajtech = 8 kB, neměnné), `h/0..255.json` (hledání handle), `v/N.json` (karta podle indexu, 256 návštěvníků).
+Při 100 000 návštěvnících: ~25 souborů vzhledů (200 kB) při startu, jinak jen malé dávky na požádání. Nasazení: `deploy.yml` (Cloudflare Pages) zapne proměnná `CF_PAGES_PROJECT`.
+Další: smyčka (komentáře/follow → `state.json`), nahrávání dávek do R2 mimo build, převzetí návštěvníka (Worker + D1).

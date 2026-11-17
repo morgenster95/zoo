@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Zoo Visitors</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%2368bd48'/><circle cx='8' cy='8' r='5' fill='%23ffc93c'/></svg>">
+<style>
+  :root { --bg:#4a3430; --cream:#fff0c8; --gold:#f2b53c; --red:#ef5b5b; --ink:#3d2a30; --sky:#9fd4ec; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; overflow:hidden; background:var(--sky); font-family: ui-monospace, Menlo, Consolas, monospace; color:var(--cream); user-select:none; }
+  canvas { display:block; image-rendering: pixelated; }
+  #hud { position:fixed; top:8px; left:50%; transform:translateX(-50%); background:var(--bg); border-top:3px solid var(--gold); padding:8px 16px 10px; text-align:center; pointer-events:none; box-shadow:0 3px 0 rgba(0,0,0,.25); min-width:220px; }
+  #hud canvas { margin:3px auto; display:block; }
+  #hud .row { display:flex; align-items:center; justify-content:center; gap:8px; }
+  #search { position:fixed; top:8px; left:8px; display:flex; gap:4px; }
+  #search input { font:inherit; font-size:14px; padding:8px 10px; border:3px solid var(--bg); background:var(--cream); color:var(--ink); width:190px; outline:none; }
+  #search button, .btn { font:inherit; font-size:14px; padding:8px 12px; border:3px solid var(--bg); background:var(--gold); color:var(--ink); cursor:pointer; font-weight:700; }
+  #msg { position:fixed; top:56px; left:8px; background:var(--bg); padding:6px 10px; font-size:13px; display:none; max-width:260px; }
+  #card { position:fixed; left:8px; bottom:8px; background:var(--bg); border-top:3px solid var(--gold); padding:12px 14px; min-width:230px; display:none; box-shadow:0 3px 0 rgba(0,0,0,.25); }
+  #card h2 { margin:0 0 4px; font-size:16px; color:var(--cream); }
+  #card .meta { font-size:13px; opacity:.85; line-height:1.5; }
+  #card canvas { float:right; margin-left:12px; background:#68bd48; border:3px solid #3d2a30; }
+  #card .x { position:absolute; top:4px; right:8px; cursor:pointer; opacity:.7; font-size:18px; }
+  #zoom { position:fixed; right:8px; bottom:8px; display:flex; flex-direction:column; gap:4px; }
+  #fps { position:fixed; right:8px; top:8px; font-size:11px; opacity:.7; color:#3d2a30; }
+</style>
+</head>
+<body>
+<div id="hud"></div>
+<form id="search"><input id="q" placeholder="find @name" autocomplete="off" spellcheck="false"><button>FIND</button></form>
+<div id="msg"></div>
+<div id="card"><span class="x" id="cx">×</span><canvas id="cprev"></canvas><h2 id="ch"></h2><div class="meta" id="cm"></div></div>
+<div id="zoom"><button class="btn" id="zin">+</button><button class="btn" id="zout">−</button><button class="btn" id="home">⌂</button></div>
+<div id="fps"></div>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+# Nasazení webu na Cloudflare Pages (zdarma, neomezený přenos statiky). Zapne se, až v repu nastavíš:
+#   Variables: CF_PAGES_PROJECT (název projektu na Cloudflare Pages)
+#   Secrets:   CLOUDFLARE_API_TOKEN (oprávnění Pages: Edit), CLOUDFLARE_ACCOUNT_ID
+# Data (zoo.json, looks, h, v) se zatím nasazují spolu s webem; až začne smyčka, přejdou na R2 (VITE_DATA_BASE), viz docs/ARCHITECTURE.md.
+name: deploy
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['web/**', 'engine/**', 'data/state.json', 'package*.json', 'vite.config.js']
+concurrency: { group: deploy, cancel-in-progress: true }
+jobs:
+  deploy:
+    if: ${{ vars.CF_PAGES_PROJECT != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm test
+      - run: npm run data:build
+      - run: npm run build
+      - name: Deploy to Cloudflare Pages
+        run: npx wrangler@3 pages deploy dist --project-name "${{ vars.CF_PAGES_PROJECT }}" --branch main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

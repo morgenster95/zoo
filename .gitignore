@@ -4,3 +4,6 @@ dist/
 .venv/
 __pycache__/
 .env
+web/public/data/
+data/state.fake.json
+*.log
