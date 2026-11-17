@@ -1,6 +1,7 @@
-"""Profilový obrázek IG: jedna plovoucí izometrická dlaždice (tráva + hlína) s plameňákem, návštěvníkem, palmou a nápisem ZOO.
-Nativně 90×90 px, zvětšeno 12× (1080²). Výstup: marketing/profile/avatar_zoo.png (+ 320px náhled)."""
-import json, os, sys
+"""Profilový obrázek IG: plovoucí izometrická dlaždice, na ní velký plameňák (hvězda), malý návštěvník, keř a květiny, nahoře nápis ZOO.
+Nativně 108×108 px, zvětšeno 10× (1080²). Plameňák je 2× hrubší než dlaždice, aby byl vidět i v kruhu 110 px na profilu.
+Výstup: marketing/profile/avatar_zoo.png (+ náhled v kruhu)."""
+import json, os, random, sys
 from PIL import Image, ImageDraw
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import zoo_art as za, visitors
@@ -8,40 +9,45 @@ from zoo_art import hx
 ROOT = os.path.join(HERE, '..', '..')
 za.load_style('C_hybrid')
 meta = json.load(open(f'{ROOT}/web/public/assets/props.json')); atlas = Image.open(f'{ROOT}/web/public/assets/atlas.png').convert('RGBA')
-def prop(n): m = meta[n]; return atlas.crop((m['x'], m['y'], m['x'] + m['w'], m['y'] + m['h'])), (m['ax'], m['ay'])
-N = 120
+def prop(n):
+    m = meta[n]; return atlas.crop((m['x'], m['y'], m['x'] + m['w'], m['y'] + m['h'])), (m['ax'], m['ay'])
+N = 108
 img = Image.new('RGBA', (N, N), hx('#3fa9d6'))
 d = ImageDraw.Draw(img)
-d.ellipse([-4, -4, N + 3, N + 3], fill=hx('#5ec8f2'))          # kruhový „obal“ (IG ořízne do kruhu)
-d.ellipse([8, 8, N - 9, N - 9], fill=hx('#8fe0f5'))
-za.OXY = (60, 54)
-# tlouštka hlíny pod dlaždicí
-def P(i, j): return za.P(i, j)
-L, B, R = P(0, 3), P(3, 3), P(3, 0)
-T = 10
+d.ellipse([-5, -5, N + 4, N + 4], fill=hx('#5ec8f2'))                       # kruh, který IG ponechá
+d.ellipse([7, 7, N - 8, N - 8], fill=hx('#8fe0f5'))
+d.ellipse([18, 30, N - 19, N - 10], fill=hx('#b9f0fb'))                     # světlý „podstavec“ za plameňákem
+
+za.OXY = (54, 66)
+P = za.P
+L, B, R = P(0, 2), P(2, 2), P(2, 0)
+T = 8
 d.polygon([L, B, (B[0], B[1] + T), (L[0], L[1] + T)], fill=hx('#b07a4a'))
 d.polygon([B, R, (R[0], R[1] + T), (B[0], B[1] + T)], fill=hx('#8a5a32'))
-for k in (3, 6):                                                   # vrstvy hlíny
+for k in (3, 6):
     d.line([(L[0], L[1] + k), (B[0], B[1] + k)], fill=hx('#9a6a3e')); d.line([(B[0], B[1] + k), (R[0], R[1] + k)], fill=hx('#6f4626'))
-import random
-for i in range(3):
-    for j in range(3):
+for i in range(2):
+    for j in range(2):
         x, y = P(i, j); img.alpha_composite(za.tile_img('grass', random.Random(3 + i * 2 + j)), (int(x - 16), int(y)))
-# kameny na okraji
-d.rectangle([L[0] + 6, L[1] + 4, L[0] + 8, L[1] + 5], fill=hx('#a39782'))
-def put(name, i, j, flip=False, k=2):
+d.rectangle([L[0] + 5, L[1] + 4, L[0] + 7, L[1] + 5], fill=hx('#a39782'))
+
+def put(name, i, j, k=1, flip=False):
     im, a = prop(name)
-    im = im.resize((im.width * k, im.height * k), Image.NEAREST); a = (a[0] * k, a[1] * k)        # ikona: objekty 2× hrubší než dlaždice
+    if k != 1: im = im.resize((im.width * k, im.height * k), Image.NEAREST); a = (a[0] * k, a[1] * k)
     if flip: im = im.transpose(Image.FLIP_LEFT_RIGHT); a = (im.width - a[0], a[1])
     x, y = P(i, j); img.alpha_composite(im, (int(x - a[0]), int(y - a[1])))
-items = [('d_palm_pot', 2.35, 0.95), ('a_flamingo', 0.95, 1.45)]
-vis = visitors.visitor(visitors.new_spec(7, kind='plain', kid=False), 'SW', 0, shadow=True)
-draw_list = [(i + j, 'p', n, i, j) for n, i, j in items] + [(1.9 + 2.3, 'v', None, 1.9, 2.3)]
-for _, kind, n, i, j in sorted(draw_list, key=lambda e: e[0]):
-    if kind == 'p': put(n, i, j)
-    else:
-        x, y = P(i, j); v2 = vis.resize((vis.width * 2, vis.height * 2), Image.NEAREST); img.alpha_composite(v2, (int(x - v2.width // 2), int(y - v2.height + 4)))
-# nápis ZOO nahoře (zlatá, tmavý obrys, stín)
+
+put('bush1', 0.25, 0.45)                      # vzadu vlevo
+put('flowers', 1.75, 0.35)
+put('a_flamingo', 1.15, 1.25, k=2, flip=True)   # hvězda ikony
+vis = visitors.visitor(visitors.new_spec(7, kind='plain', kid=False), 'SE', 0, shadow=True)
+x, y = P(0.45, 1.6); img.alpha_composite(vis, (int(x - vis.width // 2), int(y - vis.height + 3)))
+put('flowers', 1.7, 1.8)
+
+# jiskry
+for (sx_, sy_, c) in [(15, 44, '#fff2a6'), (93, 40, '#fff2a6'), (88, 62, '#ffffff'), (20, 66, '#ffffff'), (80, 30, '#fff2a6')]:
+    d.rectangle([sx_ - 1, sy_, sx_ + 1, sy_], fill=hx(c)); d.rectangle([sx_, sy_ - 1, sx_, sy_ + 1], fill=hx(c))
+
 FONT = za.FONT
 def text(txt, cx, y, sc, col, ol):
     w = sum((len(FONT[c][0]) + 1) * sc for c in txt) - sc; x0 = cx - w // 2
@@ -60,10 +66,12 @@ def text(txt, cx, y, sc, col, ol):
                     d.rectangle([xx + k * sc, y + yy * sc, xx + k * sc + sc - 1, y + yy * sc + sc - 1], fill=col)
                     d.rectangle([xx + k * sc, y + yy * sc + sc - 1, xx + k * sc + sc - 1, y + yy * sc + sc - 1], fill=hx('#e8a020'))
         xx += (len(FONT[ch][0]) + 1) * sc
-text('ZOO', 60, 8, 5, hx('#ffd23c'), hx('#3d2a30'))
+text('ZOO', 54, 5, 4, hx('#ffd23c'), hx('#3d2a30'))
+
 out = os.path.join(ROOT, 'marketing', 'profile'); os.makedirs(out, exist_ok=True)
-big = img.resize((N * 9, N * 9), Image.NEAREST); big.save(f'{out}/avatar_zoo.png')
-# náhled v kruhu 320 (jak ho uvidí IG)
+big = img.resize((N * 10, N * 10), Image.NEAREST); big.save(f'{out}/avatar_zoo.png')
 sm = big.resize((320, 320), Image.NEAREST); mask = Image.new('L', (320, 320), 0); ImageDraw.Draw(mask).ellipse([0, 0, 319, 319], fill=255)
 circ = Image.new('RGBA', (320, 320), (30, 30, 30, 255)); circ.paste(sm, (0, 0), mask); circ.save(f'{out}/avatar_zoo_circle_preview.png')
+tiny = big.resize((110, 110), Image.NEAREST); m2 = Image.new('L', (110, 110), 0); ImageDraw.Draw(m2).ellipse([0, 0, 109, 109], fill=255)
+c2 = Image.new('RGBA', (110, 110), (30, 30, 30, 255)); c2.paste(tiny, (0, 0), m2); c2.save(f'{out}/avatar_zoo_110px_preview.png')
 print('ok')
