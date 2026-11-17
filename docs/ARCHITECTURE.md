@@ -27,13 +27,9 @@ Alternativa pro login/profily: Supabase Auth (funguje na jakékoli doméně), al
 **Upozornění:** čísla Cloudflare limitů jsou z dokumentace fronty (stav 11/2026) a z paměti, před nasazením je ověřit v aktuálním ceníku.
 Potřebujeme od uživatele: Cloudflare účet (Pages, R2, Workers, D1), doménu, token pro GitHub Actions.
 
-## Datový model webu (princip z fronty, `tools/lib.mjs` `writePublic`)
+## Datový model webu
 
-- `roster.json` – malý index (počet, den, počet dávek).
-- `visitors/NNN.json` – dávky ~25 návštěvníků včetně posledních zápisů; návštěva načte jen svou dávku podle hashe handle.
-- `news/DDD.json` – noviny dne, `map/open.json` – otevřené sektory a odemčené stavby.
-- Cache: dávky `max-age=60`, kód/obrázky `immutable`.
-- Testovací data: `npm run data:fake` (4 000–10 000 návštěvníků), měřit paměť a načtení na mobilu.
+Převzato z principu fronty (malé dávky, nikdy celá soupiska), konkrétní soubory viz „Stav implementace“ níže. Cache: dávky `max-age=60`, sprity `max-age=3600`, testovací data `npm run data:fake`.
 
 ## Stav implementace (17. 11. 2026)
 
