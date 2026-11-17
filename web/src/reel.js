@@ -91,7 +91,7 @@ for (const [key, lot] of Object.entries(lots)) {
   r.items.forEach((it) => {
     if (!propTex[it.name]) return;
     const s = prop(it.name, it.i, it.j, it.z); if (it.flip) s.scale.x = -1;
-    if (it.name === 'a_zebra') { if (!zebraA) zebraA = s; else zebraB = s; }
+    if (it.name === 'a_alpaca') { if (!zebraA) zebraA = s; else zebraB = s; }
     if (it.name === 'plot' && key === '-1,0') previewPlot = { a, b };
   });
 }
@@ -175,12 +175,12 @@ for (const ln of tl.lines) {
   }
   flush();
 }
-let capSprite = null, capKey = -1;
+let capSprite = null, capKey = -1, capT0 = 0;
 function captionAt(t) {
   let k = -1;
   for (let n = 0; n < caps.length; n++) if (t >= caps[n].t0 - 0.05 && t < caps[n].t1 + 0.25) k = n;
   if (k === capKey) return;
-  capKey = k;
+  capKey = k; capT0 = k >= 0 ? caps[k].t0 : 0;
   if (capSprite) { hud.removeChild(capSprite); capSprite.destroy(); capSprite = null; }
   if (k < 0) return;
   const text = caps[k].text, sc = 11;
@@ -261,7 +261,9 @@ function camAt(t) {
   let a = camKeys[0], b = camKeys[0];
   for (let k = 0; k < camKeys.length; k++) { if (camKeys[k].t <= t) a = camKeys[k]; if (camKeys[k].t > t) { b = camKeys[k]; break; } b = camKeys[k]; }
   const f = a === b || b.t === a.t ? 0 : ease((t - a.t) / (b.t - a.t));
-  return { i: lerp(a.i, b.i, f), j: lerp(a.j, b.j, f), z: lerp(a.z, b.z, f) };
+  let z = lerp(a.z, b.z, f);
+  for (const c of [P.cue.coins, P.cue.escape, P.cue.fence, P.cue.vote, P.cue.bus, P.cue.cta]) if (t >= c) z *= 1 + 0.07 * Math.exp(-(t - c) * 7);    // krátký „zoom punch“ na začátku každé scény
+  return { i: lerp(a.i, b.i, f), j: lerp(a.j, b.j, f), z };
 }
 
 // ------------------------------------------------------------ hlavní funkce snímku
@@ -277,7 +279,8 @@ function setTime(t) {
   fx.clear();
   const cam = camAt(t);
   world.scale.set(cam.z);
-  world.position.set(Math.round(W / 2 - sx(cam.i, cam.j) * cam.z), Math.round(H * 0.47 - sy(cam.i, cam.j) * cam.z));
+  const sh = t >= P.cue.escape && t < P.cue.escape + 0.5 ? (1 - (t - P.cue.escape) / 0.5) * 10 : 0;
+  world.position.set(Math.round(W / 2 - sx(cam.i, cam.j) * cam.z + Math.sin(t * 90) * sh), Math.round(H * 0.47 - sy(cam.i, cam.j) * cam.z + Math.cos(t * 77) * sh));
 
   // ---- počty
   const tot = smoothTotals(t);
@@ -373,6 +376,7 @@ function setTime(t) {
   cta.visible = t >= P.cue.cta + 0.7; if (cta.visible) { cta.scale.set(1 + Math.sin(t * 6) * 0.03); cta.alpha = 0.55 + 0.45 * Math.abs(Math.sin(t * 3.2)) + 0.0; cta.alpha = 1; }
   dayTag.visible = t < P.cue.coins;
   captionAt(t);
+  if (capSprite) capSprite.scale.set(1 + 0.2 * Math.max(0, 1 - (t - capT0) / 0.13));
   app.render();
 }
 const clampk = (x) => Math.max(0, Math.min(1, x));

@@ -42,7 +42,11 @@ def tts_line(text, voice, rate, pitch, mp3):
                 if ch['type'] == 'audio': f.write(ch['data'])
                 elif ch['type'] == 'WordBoundary': words.append({'w': ch['text'], 't0': ch['offset'] / 1e7, 't1': (ch['offset'] + ch['duration']) / 1e7})
         return words
-    return asyncio.run(go())
+    for k in range(4):                                   # služba občas vrátí prázdnou odpověď: pár pokusů
+        try: return asyncio.run(go())
+        except Exception as e:
+            if k == 3: raise
+            import time; time.sleep(1.5)
 
 def voice(folder):
     sc = json.load(open(os.path.join(folder, 'script.json')))
@@ -89,7 +93,7 @@ def echo(a, delay=0.32, gain=0.3, taps=3):
         g = gain ** k; out[k * d:] += a[: len(a) - k * d] * g
     return out
 
-def music(total, bpm=92):
+def music(total, bpm=112):
     beat = 60.0 / bpm; bar = beat * 4
     out = np.zeros(int(total * SR) + 4 * SR, np.float32)
     prog = [(48, [60, 64, 67, 71]), (45, [57, 60, 64, 67]), (41, [57, 60, 65, 69]), (43, [55, 59, 62, 67])]   # Cmaj7, Am7, Fmaj7, G
@@ -105,8 +109,13 @@ def music(total, bpm=92):
             if rng.rand() < 0.55:
                 nn = 72 + root % 12 + scale[rng.randint(0, 5)] - 12 + (12 if rng.rand() < 0.3 else 0)
                 w = bell(mtof(nn), 0.9, 0.07, (1.0, 0.0, 0.22), 4.2); i = int((t + s * beat / 2) * SR); out[i:i + len(w)] += w[: len(out) - i]
+        for b in range(4):                                      # jemný rytmus: měkký buben na doby a tichý klik mezi nimi
+            tt = np.arange(int(0.18 * SR)) / SR
+            kick = (np.sin(2 * np.pi * 62 * np.exp(-tt * 9) * tt) * np.exp(-tt * 16) * (0.20 if b % 2 == 0 else 0.11)).astype(np.float32)
+            i = int((t + b * beat) * SR); out[i:i + len(kick)] += kick[: len(out) - i]
+            w = bell(1800, 0.05, 0.035, (1.0, 0.0, 0.0), 60); i = int((t + b * beat + beat / 2) * SR); out[i:i + len(w)] += w[: len(out) - i]
         t += bar; k += 1
-    out = echo(out, 0.375, 0.32, 3)
+    out = echo(out, 0.27, 0.28, 3)
     return out[: int(total * SR) + SR]
 
 def sfx(kind):

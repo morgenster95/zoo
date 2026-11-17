@@ -54,11 +54,11 @@ export function plan(tl) {
   };
   // ---- příchody návštěvníků (zrychlují; každý přidá 10 mincí v okamžiku, kdy projde bránou)
   const arrivals = [];
-  let t = cue.visitor + 0.1, gap = 2.4, k = 0;
+  let t = cue.visitor + 0.1, gap = 1.7, k = 0;
   while (t < total - 7.5 && k < 13) {          // jen ilustrativně: pár návštěvníků, ne celý dav
     const w = walker(routeTo(k), t, 2.1);
     arrivals.push({ k, t0: t, walk: w, tGate: t + (4.5 - 1.4) / 2.1, look: hashString('r' + k) % 256 });
-    t += gap; gap = Math.max(1.5, gap * 0.9); k++;
+    t += gap; gap = Math.max(0.9, gap * 0.88); k++;
   }
   // ---- zebra, která uteče
   const pad = fenceOf(-1, -1);                                               // plot výběhu pro zebry
