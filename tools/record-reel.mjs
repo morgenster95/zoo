@@ -26,12 +26,12 @@ try {
   page.on('pageerror', (e) => console.log('PAGE ERROR', e.message));
   page.on('console', (m) => { if (m.type() === 'error') console.log('console:', m.text()); });
   await page.setViewport({ width: 1080, height: 1920, deviceScaleFactor: 1 });
-  await page.goto(`http://localhost:${PORT}/reel.html?reel=${reel}`);
+  await page.goto(`http://localhost:${PORT}/reel.html?reel=${reel}${args.includes('--clean') ? '&clean=1' : ''}${args.includes('--cam') ? '&cam=' + args[args.indexOf('--cam') + 1] : ''}`);
   await page.waitForFunction('window.__reel && window.__reel.ready', { timeout: 60000 });
   const total = await page.evaluate('window.__reel.total');
   const clip = { x: 0, y: 0, width: 1080, height: 1920 };
   if (stills.length) {
-    const out = path.join(dir, 'stills'); fs.mkdirSync(out, { recursive: true });
+    const out = path.join(dir, args.includes('--clean') ? 'stills_clean' : 'stills'); fs.mkdirSync(out, { recursive: true });
     for (const t of stills) { await page.evaluate((x) => window.__reel.setTime(x), t); await page.screenshot({ path: path.join(out, `t${t.toFixed(1)}.png`), clip }); console.log('still', t); }
   } else {
     const from = arg('--from', 0), to = Math.min(arg('--to', total), total);

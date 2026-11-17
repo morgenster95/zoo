@@ -257,7 +257,9 @@ const camKeys = [
   { t: P.cue.fence, i: -2.5, j: -2.5, z: 5.2 }, { t: P.cue.fence + 4.2, i: -2.5, j: -2.2, z: 4.8 }, { t: P.cue.vote, i: -0.5, j: 1.0, z: 3.4 },
   { t: P.cue.bus - 0.2, i: -0.5, j: 1.0, z: 3.4 }, { t: P.cue.bus + 1.2, i: 0.5, j: 7.4, z: 4.2 }, { t: P.cue.cta, i: 0.5, j: 2.4, z: 3.2 }, { t: P.total, i: 0.5, j: 2.2, z: 3.0 },
 ];
+const camOverride = q.get('cam') ? q.get('cam').split(',').map(Number) : null;      // ?cam=i,j,z pro náhledovku
 function camAt(t) {
+  if (camOverride) return { i: camOverride[0], j: camOverride[1], z: camOverride[2] };
   let a = camKeys[0], b = camKeys[0];
   for (let k = 0; k < camKeys.length; k++) { if (camKeys[k].t <= t) a = camKeys[k]; if (camKeys[k].t > t) { b = camKeys[k]; break; } b = camKeys[k]; }
   const f = a === b || b.t === a.t ? 0 : ease((t - a.t) / (b.t - a.t));
@@ -381,5 +383,6 @@ function setTime(t) {
 }
 const clampk = (x) => Math.max(0, Math.min(1, x));
 
+hud.visible = !q.get('clean');                                           // ?clean=1: bez HUD a titulků (podklad pro náhledovku)
 window.__reel = { setTime, total: P.total, fps: 30, ready: true };
 setTime(Number(q.get('t') || 0));
