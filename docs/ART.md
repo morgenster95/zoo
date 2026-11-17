@@ -54,6 +54,13 @@ Postavil jsem nový renderer: siluety z polygonů, objem z mapy výšky (vzdále
 **Slabé místo:** anatomie a siluety. Vzor má ručně vymodelované tvary (ohnuté nohy, výrazné hlavy), moje polygony jsou tužší, hlavy jednodušší, lev má oddělený ocas.
 **Závěr:** pro finální zvířata v tomhle stylu je lepší PixelLab se stylovým obrázkem (nebo ruční dokreslení), můj renderer se hodí na rychlé návrhy, stíny a sjednocení barev.
 
+## Měřítko (oprava 17. 11. 2026)
+
+První verze měla zvířata obří vůči návštěvníkům. Pravidlo teď: **dospělý návštěvník = 10 px výšky** (14 s obrysem a stínem).
+Zvíře v kohoutku je výškou po hřbet zhruba jako dospělý, slon ~2×, žirafa ~2,5×, tučňák a želva menší. Měřítko je v `animals.py` (`ANIMAL_K`: slon 0.56, žirafa 0.46, zebra/lev/panda/hroch 0.5 …).
+Kontrola: `styles/scale_check_visitors_vs_animals.png` (dva návštěvníci a všech 13 zvířat vedle sebe). Při přidání nového zvířete ho vždy porovnat s tímhle obrázkem.
+Parcely k zastavění jsou ploché (vyšlapaná zem, čárkovaný obrys, pásky v rozích) a cedule „?“ je před nimi, bez kůlů.
+
 Plán:
 - **Kulisy, zvířata, budovy, terén:** vlastní generace (kód) nebo PixelLab (`create_object_pro_flash`, izometrie) – podle toho, co vypadá lépe; vždy s paletou výše.
 - **Návštěvníci (stovky variant, chůze 4–8 směrů):** PixelLab `create_character` + animace (postup z fronty: `tools/pixellab.py`, ledger proti duplikátům, `sprite_qa.py`). Generace jsou omezené, proto jednou správně.

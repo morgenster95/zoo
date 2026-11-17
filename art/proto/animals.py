@@ -197,7 +197,7 @@ def zebra():
     c.line([(29, 5), (23, 15)], 1.6, flat=k)                         # hříva
     c.blob(29, 3.5, 1.5, 1.8, r, flat=k); c.eye(32, 6)
     c.blush(31, 9, hx('#f6a8bf'))
-    for xx in range(7, 25, 4):
+    for xx in range(7, 25, 6):
         c.overlay(lambda d, s, xx=xx: d.polygon([(s(xx), s(10)), (s(xx + 1.2), s(10)), (s(xx - 1.8), s(24)), (s(xx - 3), s(24))], fill=255), k)
     for (a, b) in [(25, 14), (29, 10)]:
         c.overlay(lambda d, s, a=a, b=b: d.line([(s(a), s(b + 3)), (s(a + 4), s(b - 1))], fill=255, width=max(1, int(K))), k)
@@ -232,7 +232,7 @@ def tiger():
     c.px(34, 15, hx('#d4607a')); c.px(35, 15, hx('#d4607a'))
     c.blob(24, 7.5, 2.4, 2.4, r); c.blob(32, 7, 2.4, 2.4, r)
     c.eye(30, 11); c.blush(28, 16)
-    for xx in range(7, 23, 4):
+    for xx in range(7, 23, 6):
         c.overlay(lambda d, s, xx=xx: d.polygon([(s(xx), s(10)), (s(xx + 1.0), s(10)), (s(xx - .2), s(19)), (s(xx - 1.2), s(19))], fill=255), k)
     for yy in (22,):
         for lx in (4, 6, 20, 22):
@@ -350,7 +350,8 @@ def turtle():
     return c.done()
 
 ANIMALS_EXTRA = [('rhino', rhino), ('bear', bear), ('turtle', turtle)]
-ANIMAL_K = dict(giraffe=0.76, elephant=0.9, hippo=0.9, rhino=0.9, penguin=1.0, flamingo=0.95)
+# měřítko k návštěvníkovi (dospělý = 10 px výšky): zebra ~ výška po hřbet jako dospělý, slon ~2×, žirafa ~3×
+ANIMAL_K = dict(elephant=0.56, giraffe=0.46, zebra=0.5, lion=0.5, tiger=0.5, panda=0.5, hippo=0.5, rhino=0.52, bear=0.5, monkey=0.5, flamingo=0.55, penguin=0.55, turtle=0.65)
 
 def _wrap(fn, k):
     def f():
@@ -363,7 +364,7 @@ def _wrap(fn, k):
 
 ANIMALS = [('elephant', elephant), ('giraffe', giraffe), ('zebra', zebra), ('lion', lion), ('tiger', tiger),
            ('panda', panda), ('hippo', hippo), ('flamingo', flamingo), ('penguin', penguin), ('monkey', monkey)] + ANIMALS_EXTRA
-ANIMALS = [(n, _wrap(f, ANIMAL_K.get(n, 0.9))) for n, f in ANIMALS]
+ANIMALS = [(n, _wrap(f, ANIMAL_K.get(n, 0.5))) for n, f in ANIMALS]
 
 def sheet(scale=5):
     items = [(n, f()) for n, f in ANIMALS]

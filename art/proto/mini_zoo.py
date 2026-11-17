@@ -233,16 +233,22 @@ def kasa(coins):
 
 # ---------------------------------------------------------------- chudé rekvizity
 def stake_plot():
-    """parcela k zastavění: dřevěné kolíky se provazem a cedulí „?“"""
-    im, g = new(70, 44)
+    """parcela k zastavění: plochá vyšlapaná zem s křídovým obrysem, nízké kolíky v rozích a pásky"""
+    im, g = new(70, 40)
     pts = [(35, 4), (66, 20), (35, 36), (4, 20)]
-    g.polygon(pts, fill=hx('#c49a68'))
-    g.polygon([(35, 8), (58, 20), (35, 32), (12, 20)], fill=hx('#d6ae7a'))
-    for (x, y) in pts:
-        g.rectangle([x - 1, y - 3, x, y + 1], fill=hx('#8a5a3a'))
+    g.polygon(pts, fill=hx('#cda374'))
+    g.polygon([(35, 8), (58, 20), (35, 32), (12, 20)], fill=hx('#d9b184'))
+    # čárkovaný obrys po zemi
     for a, b in zip(pts, pts[1:] + pts[:1]):
-        g.line([(a[0], a[1] - 2), (b[0], b[1] - 2)], fill=hx('#f0e6d0'))
-    return outlined(im, hx('#5a3a24')), (35, 36)
+        n = 10
+        for q in range(n):
+            if q % 2 == 0:
+                t0, t1 = q / n, (q + 1) / n
+                g.line([(a[0] + (b[0] - a[0]) * t0, a[1] + (b[1] - a[1]) * t0), (a[0] + (b[0] - a[0]) * t1, a[1] + (b[1] - a[1]) * t1)], fill=hx('#fff3d6'))
+    # nízké kolíky s barevnou páskou
+    for k, (x, y) in enumerate(pts):
+        g.rectangle([x - 1, y - 1, x, y], fill=[hx('#ef5b5b'), hx('#ffc93c')][k % 2])
+    return im, (35, 36)
 
 def question_sign():
     im, g = new(14, 24)
@@ -373,9 +379,9 @@ def make_mini(n_visitors=12, W=420, H=262):
     put_b(A['zebra'](), 2.3, 2.4, .1); put_b(A['zebra'](), 4.2, 4.1, .1)
     put_b(A['flamingo'](), 8.0, 2.6, .1); put_b(A['flamingo'](), 8.9, 3.4, .1)
     # parcely k zastavění (hlasování)
-    put(stake_plot(), 3.2, 6.8, .1); put(question_sign(), 2.2, 7.2, .45)
-    put(stake_plot(), 10.2, 10.0, .1); put(question_sign(), 9.2, 10.4, .45)
-    put(stake_plot(), 9.8, 6.8, .1); put(question_sign(), 8.8, 7.2, .45)
+    put(stake_plot(), 3.2, 6.8, .1); put(question_sign(), 2.2, 7.2, 1.5)
+    put(stake_plot(), 10.2, 10.0, .1); put(question_sign(), 9.2, 10.4, 1.5)
+    put(stake_plot(), 9.8, 6.8, .1); put(question_sign(), 8.8, 7.2, 1.5)
     put(stake_plot(), 8.7, 5.7, .1) if False else None
     # rekvizity
     put(bench(), 4.1, 5.9, .3); put(bench(), 6.9, 5.9, .3)
