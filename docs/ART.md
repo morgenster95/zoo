@@ -37,6 +37,15 @@ Pravidla, která drží všech 13 zvířat (slon, žirafa, zebra, lev, tygr, pan
 Zkouška: `art/proto/styles/C_animals_sheet.png` (arch obou směrů) a `C_hybrid_scene_new_animals.png` (ve scéně).
 Známé slabiny: chybí chůze a jiné směry než bok (zepředu/zezadu), lev a hroch mají jednoduchou hlavu, žirafy na mapě jsou větší než budovy (zmenšit nebo zvětšit budovy).
 
+## Návštěvníci (v2, `art/proto/visitors.py`)
+
+- **Chibi proporce:** dospělý 7×10 px (hlava 4 řádky), dítě 5×8, selektivní obrys. Vzhled = pleť (6) × účes (7) × barva vlasů (8) × oblečení (triko/šaty/kalhoty) × doplněk.
+- **4 izometrické směry** (SE, SW k nám, NE, NW zády; levý/pravý je zrcadlo) a **chůze o 4 snímcích** (stoj, levá noha, stoj, pravá noha, houpání rukou).
+- **Typy** (odpovídají „typům návštěvníků“ z přání v komentáři): `plain`, `family` (rodič s kočárkem), `schoolkid` (batoh), `photographer` (foťák, vesta, čepice), `balloon` (1–3 balónky), `tourist` (klobouk, mapa), `grandpa` (hůl, šedé vlasy), `icecream` (dítě se zmrzlinou), `supporter` (zlatá hvězdička nad hlavou = Přítel zoo).
+- **Vzhled z handle:** `new_spec(seed)`, seed = hash @handle, takže každý návštěvník vypadá pokaždé stejně a je poznat. Kombinací je desítky tisíc.
+- Výstupy: `styles/visitors_types.png`, `visitors_crowd.png`, `visitors_walk.gif`, `C_hybrid_scene_visitors.png`.
+- Slabiny: bez bočního pohledu, jen zepředu/zezadu; chůze je jednoduchá; žádné sezení na lavičce, krmení zvířat ani focení (další animace).
+
 Plán:
 - **Kulisy, zvířata, budovy, terén:** vlastní generace (kód) nebo PixelLab (`create_object_pro_flash`, izometrie) – podle toho, co vypadá lépe; vždy s paletou výše.
 - **Návštěvníci (stovky variant, chůze 4–8 směrů):** PixelLab `create_character` + animace (postup z fronty: `tools/pixellab.py`, ledger proti duplikátům, `sprite_qa.py`). Generace jsou omezené, proto jednou správně.
