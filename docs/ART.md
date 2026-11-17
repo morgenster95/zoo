@@ -24,6 +24,19 @@ věž, kupole, kolotoč, iglú, texturovaná tráva/cesta/dlažba, hustá zeleň
 `B_playful` = světlý cukrový, `C_hybrid` = struktura reference + světlejší barvy. Styl se přepíná slovníkem `STYLES`.
 Slabiny: zvířata jsou jednodušší než budovy, žádné animace, budovy mají jen jednu orientaci a málo detailů (okna, dveře, truhlíky).
 
+## Zvířata: styl (v2, `art/proto/animals.py`)
+
+Pravidla, která drží všech 10 zvířat (slon, žirafa, zebra, lev, tygr, panda, hroch, plameňák, tučňák, opice):
+1. **Pohled z boku doprava**, doleva je zrcadlo. Světlo vlevo nahoře.
+2. **Čtyřtónová rampa** na zvíře (světlo, základ, stín, hluboký stín), tělo = „koule“ s ditherem na přechodech, tenké části (krk, chobot, nohy) stínované podle okraje.
+3. **Selektivní obrys:** tmavší odstín sousední barvy, ne jedna barva pro všechno (zvířata jsou měkčí než budovy).
+4. **Oko 2×2 + odlesk, růžový ruměnec**, tmavá kopyta, vzory (skvrny, pruhy) jen uvnitř siluety.
+5. **Velikost na mapě** (`K = 0.9`): slon ~45×38, žirafa ~34×56, tučňák ~12×16. `K = 1.0` je „hero“ velikost pro kartu a close-up.
+6. Nové zvíře = nová rampa v `R`, funkce složená z částí (`blob`, `limb`, `line`, `poly`, `overlay`).
+
+Zkouška: `art/proto/styles/C_animals_sheet.png` (arch obou směrů) a `C_hybrid_scene_new_animals.png` (ve scéně).
+Známé slabiny: chybí chůze a jiné směry než bok (zepředu/zezadu), lev a hroch mají jednoduchou hlavu, žirafy na mapě jsou větší než budovy (zmenšit nebo zvětšit budovy).
+
 Plán:
 - **Kulisy, zvířata, budovy, terén:** vlastní generace (kód) nebo PixelLab (`create_object_pro_flash`, izometrie) – podle toho, co vypadá lépe; vždy s paletou výše.
 - **Návštěvníci (stovky variant, chůze 4–8 směrů):** PixelLab `create_character` + animace (postup z fronty: `tools/pixellab.py`, ledger proti duplikátům, `sprite_qa.py`). Generace jsou omezené, proto jednou správně.
