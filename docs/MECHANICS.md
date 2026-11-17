@@ -42,5 +42,14 @@ Základ je z fronty (denní rytmus, hlasování v komentářích, noviny), jen m
 ## 7. Milníky (velké okamžiky pro reely)
 100, 500, 1 000, 5 000, 10 000 návštěvníků: odemknou novou skupinu katalogu, otevřou prstenec a pustí **slavnostní událost** (ohňostroj, páska se stříhá, balónky letí). Každý milník = jeden reel.
 
-## 8. Otevřené otázky (rozhodnout)
-Viz otázky v konverzaci; po odpovědích sem zapíšu pravidla definitivně.
+## 8. Rozhodnuto (17. 11. 2026)
+- **Hlasování jednou denně** (večer otevřeno, ráno vyhodnoceno, rytmus jako fronta).
+- **Mince jsou společné.** Neexistuje „vítěz bez peněz“: **možnosti vybírá majitel hry** (`data/queue.json`, pořadí = priorita), takže jsou vždy předem připravené a dostupné. Engine to hlídá: `openVote` odmítne nabídku dražší než zůstatek, `daily.mjs` ji přeskočí a napíše to do logu.
+- **Stavba stojí okamžitě** po vyhodnocení. Bez hlasů (nebo při remíze) vyhrává první možnost v pořadí od majitele.
+- **Vždy aspoň 2 volné parcely.** Když dojdou bloky, mapa se rozšíří o prstenec (`state.ring`), i když návštěvníků ještě není tolik.
+- Implementace: `engine/catalog.js` (katalog), `engine/vote.js` (otevřít, hlas, vyhodnotit, parcely), `tools/daily.mjs` (denní tah), web ukazuje panel „Tonight's vote“. Testy v `engine/engine.test.js`.
+
+## 9. Ještě otevřené
+- Napojení Instagramu: komentáře → `castVote`, počet followerů → nové návštěvníky.
+- Noviny (Zoo Gazette) a deníky návštěvníků, milníky 100/500/1 000/5 000/10 000.
+- Velké stavby přes víc parcel (zatím 1 stavba = 1 parcela).

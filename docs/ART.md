@@ -67,6 +67,15 @@ Staré stromy (kulička a smrček) nahrazeny malovanými: kupy listí se stínov
 Druhy: 3 duby, smrk, bříza, palma, akácie, baobab, bambus, třešeň, 2 keře, květiny, rákosí, trs trávy. Palma, akácie, baobab (savana), bambus a třešeň (Asie) jsou připravené pro rodiny výběhů.
 V mapě: louky mají mix (30 % stromy, jinak keře/květiny/tráva), okraj je řídký les, před bránou volno, rybníček má rákosí. Arch: `styles/vegetation_sheet.png`.
 
+## PixelLab (povoleno uživatelem 17. 11. 2026: dekorace, lavičky, základní sada zvířat, bez animací)
+
+Nástroj: `tools/pixellab.py` (klíč jen v prostředí `PIXELLAB_API_KEY`, nikdy v repu). Pojistky: **ledger** `art/pixellab/ledger.jsonl` (stejný název = nic se neodešle), fronta max 6 úloh, jedno odeslání bez automatických opakování, zůstatek `balance`.
+Úspornost: **jeden obrázek = celý sheet** (jedna úloha za 5–9 generací, ceník podle delší strany: ≤96 px 5, ≤128 px 6, ≤256 px 9), pak řez na sprity (`art/proto/slice_pixellab.py`).
+Použito: `animals_sheet_1` (256², 9 gen, 12 zvířat ve velkém rozlišení pro karty a close-upy), `animals_sheet_small_1` (128², 6 gen, 12 zvířat v měřítku mapy), `decor_sheet_small_1` (128², 6 gen, 16 dekorací). **Celkem 21 generací** (zůstatek 1 197 z 2 000).
+Stylové kotvy (nahrávají se jako `style_image`, v nativním rozlišení): `art/pixellab/anchor_wildlife.png` (vzor od uživatele) a `anchor_decor_small.png` (naše rekvizity).
+Sprity v mapě: `a_<zvíře>` (PixelLab, stín přebarven na poloprůhledný), `d_<dekorace>`; moje původní zvířata zůstávají jako `old_a_*`.
+Další sheety dělat stejně (jeden sheet, kotva stylu, před odesláním zkontrolovat ledger).
+
 Plán:
 - **Kulisy, zvířata, budovy, terén:** vlastní generace (kód) nebo PixelLab (`create_object_pro_flash`, izometrie) – podle toho, co vypadá lépe; vždy s paletou výše.
 - **Návštěvníci (stovky variant, chůze 4–8 směrů):** PixelLab `create_character` + animace (postup z fronty: `tools/pixellab.py`, ledger proti duplikátům, `sprite_qa.py`). Generace jsou omezené, proto jednou správně.

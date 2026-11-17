@@ -73,3 +73,58 @@ test('parcela má okraje uvnitř bloku', () => {
   const b = lotBox(-1, -1);
   assert.equal(b.i0, -5); assert.equal(b.i1, -1); assert.equal(b.ci, -2.5);
 });
+
+import { CATALOG } from './catalog.js';
+import { openVote, castVote, resolveVote, tally, freePlots, ensurePlots } from './vote.js';
+
+function zooWith(n) { const s = emptyState(); for (let k = 0; k < n; k++) addVisitor(s, 'v' + k); return s; }
+
+test('hlasování: nabídne se jen to, na co jsou mince', () => {
+  const s = zooWith(12);                       // 120 mincí
+  assert.throws(() => openVote(s, ['cafe', 'bench']), /dražší/);
+  openVote(s, ['bench', 'flowers', 'cart']);
+  assert.equal(s.vote.options.length, 3);
+  assert.throws(() => openVote(s, ['bench', 'flowers']), /už běží/);
+});
+
+test('hlas: jeden na účet, platí poslední, jen návštěvník, nejasné se ignoruje', () => {
+  const s = zooWith(12);
+  openVote(s, ['bench', 'flowers', 'cart']);
+  assert.equal(castVote(s, 'v1', 'I vote FLOWERS!').key, 'FLOWERS');
+  assert.equal(castVote(s, 'v1', 'no wait, ICECREAM').key, 'ICECREAM');
+  assert.equal(castVote(s, 'stranger', 'BENCH'), null);
+  assert.equal(castVote(s, 'v2', 'BENCH and FLOWERS'), null);
+  assert.deepEqual(tally(s.vote), { BENCH: 0, FLOWERS: 0, ICECREAM: 1 });
+});
+
+test('vyhodnocení: vítěz se zaplatí společnými mincemi a stojí hned na volné parcele', () => {
+  const s = zooWith(12);
+  openVote(s, ['bench', 'flowers', 'cart']);
+  castVote(s, 'v1', 'ICECREAM'); castVote(s, 'v2', 'ICECREAM'); castVote(s, 'v3', 'BENCH');
+  const r = resolveVote(s, 2);
+  assert.equal(r.winner, 'ICECREAM'); assert.equal(r.price, 100);
+  assert.equal(balance(s), 20);
+  assert.equal(s.lots[r.lot].sprite, 'd_kiosk');
+  assert.ok(freePlots(s).length >= 2, 'vždy aspoň 2 volné parcely');
+  assert.equal(s.vote.closed, true);
+});
+
+test('bez hlasů vyhrává první možnost, kterou majitel nabídl', () => {
+  const s = zooWith(12);
+  openVote(s, ['flowers', 'bench']);
+  assert.equal(resolveVote(s).winner, 'FLOWERS');
+});
+
+test('mince se nikdy nedostanou do mínusu a plocha se dočasně rozšíří, když dojdou parcely', () => {
+  const s = zooWith(200);                      // 2000 mincí
+  for (let k = 0; k < 6; k++) { s.vote = null; const aff = ['bench', 'flowers'].filter((i) => CATALOG[i].price <= balance(s)); if (aff.length < 2) break; openVote(s, aff); resolveVote(s); }
+  assert.ok(balance(s) >= 0);
+  assert.ok(freePlots(s).length >= 2);
+});
+
+test('když dojdou volné bloky, mapa se rozšíří o prstenec a parcely jsou vždy aspoň 2', () => {
+  const s = zooWith(12);
+  for (let k = 0; k < 8; k++) { s.vote = null; openVote(s, ['bench', 'lamp']); resolveVote(s); s.spent = 0; }   // 8 staveb v malé zoo
+  assert.ok(freePlots(s).length >= 2);
+  assert.ok(s.ring >= 2, 'ring=' + s.ring);
+});

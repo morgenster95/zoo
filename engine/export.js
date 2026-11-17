@@ -1,11 +1,14 @@
 // Převod stavu na statické soubory pro web (malé dávky, ať nikdy nestahujeme celou soupisku).
 import { balance, SHARDS, LOOK_CHUNK, IDX_CHUNK, shardOf } from './state.js';
 
+import { tally } from './vote.js';
+const publicVote = (v) => v ? { day: v.day, closed: v.closed, options: v.options, counts: tally(v), voters: Object.keys(v.votes).length, result: v.result || null } : null;
+
 export function publicData(state) {
   const n = state.visitors.length;
   const zoo = {
     v: 1, updated: state.updated, day: state.day, visitors: n, coins: balance(state), spent: state.spent || 0,
-    lots: state.lots, shards: SHARDS, lookChunk: LOOK_CHUNK, lookChunks: Math.ceil(n / LOOK_CHUNK), idxChunk: IDX_CHUNK,
+    ring: state.ring || 1, lots: state.lots, vote: publicVote(state.vote), history: (state.history || []).slice(-10), shards: SHARDS, lookChunk: LOOK_CHUNK, lookChunks: Math.ceil(n / LOOK_CHUNK), idxChunk: IDX_CHUNK,
   };
   const looks = [];
   for (let c = 0; c * LOOK_CHUNK < n; c++) {

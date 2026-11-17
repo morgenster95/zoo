@@ -11,7 +11,7 @@ export const lookOf = (handle) => hashString('look:' + handle) % LOOKS;
 export const shardOf = (handle) => hashString(handle) % SHARDS;
 
 export function emptyState() {
-  return { theme: 'zoo', day: 1, visitors: [], spent: 0, lots: JSON.parse(JSON.stringify(START_LOTS)), updated: null };
+  return { theme: 'zoo', day: 1, visitors: [], spent: 0, lots: JSON.parse(JSON.stringify(START_LOTS)), vote: null, history: [], updated: null };
 }
 
 /** přidá návštěvníka (jen jednou na účet); vrací jeho index nebo -1 */

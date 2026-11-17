@@ -23,6 +23,8 @@
   #card canvas { float:right; margin-left:12px; background:#68bd48; border:3px solid #3d2a30; }
   #card .x { position:absolute; top:4px; right:8px; cursor:pointer; opacity:.7; font-size:18px; }
   #zoom { position:fixed; right:8px; bottom:8px; display:flex; flex-direction:column; gap:4px; }
+  #vote { position:fixed; right:8px; top:30px; width:230px; background:var(--bg); border-top:3px solid var(--gold); padding:10px 12px; font-size:12px; line-height:1.5; display:none; box-shadow:0 3px 0 rgba(0,0,0,.25); }
+  #vote b { color:var(--gold); } #vote .opt { display:flex; justify-content:space-between; gap:8px; } #vote .hint { opacity:.8; margin-top:6px; }
   #fps { position:fixed; right:8px; top:8px; font-size:11px; opacity:.7; color:#3d2a30; }
 </style>
 </head>
@@ -32,6 +34,7 @@
 <div id="msg"></div>
 <div id="card"><span class="x" id="cx">×</span><canvas id="cprev"></canvas><h2 id="ch"></h2><div class="meta" id="cm"></div></div>
 <div id="zoom"><button class="btn" id="zin">+</button><button class="btn" id="zout">−</button><button class="btn" id="home">⌂</button></div>
+<div id="vote"></div>
 <div id="fps"></div>
 <script type="module" src="/src/main.js"></script>
 </body>

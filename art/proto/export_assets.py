@@ -55,7 +55,13 @@ props = {}
 def add(name, im, anchor=None):
     props[name] = (im, anchor or (im.width // 2, im.height - 2))
 
-for n, f in animals.ANIMALS: add('a_' + n, f())
+for n, f in animals.ANIMALS: add('old_a_' + n, f())      # moje původní (záloha), v mapě jsou sprity z PixelLabu
+PL = os.path.join(HERE, '..', 'pixellab', 'sprites')
+if os.path.isdir(PL):
+    for fn in sorted(os.listdir(PL)):
+        if not fn.endswith('.png'): continue
+        im = Image.open(os.path.join(PL, fn)).convert('RGBA'); nm = fn[:-4]
+        add(nm, im, (im.width // 2, im.height - (3 if nm.startswith('a_') else 2)))
 for n, f in veg.ALL:
     im = f()
     add(n, im, (im.width // 2, im.height - 4 if n not in ('flowers', 'tuft', 'bush1', 'bush2', 'reeds') else im.height - 2))

@@ -1,0 +1,5 @@
+[
+  { "note": "Majitel hry vybírá možnosti; pořadí = priorita při remíze nebo nule hlasů.", "options": ["bench", "flowers", "cart"] },
+  { "options": ["lamp", "picnic", "balloons"] },
+  { "options": ["cafe", "penguins", "monkeys"] }
+]

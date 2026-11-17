@@ -54,7 +54,7 @@ const overlay = new Container();
 world.addChild(groundLayer, objects, overlay);
 app.stage.addChild(world);
 
-const R = regionFor(zoo.visitors);
+const R = Math.max(regionFor(zoo.visitors), zoo.ring || 1);
 const lots = zoo.lots || {};
 
 function tileKind(i, j) {
@@ -154,7 +154,7 @@ function buildEntrance() {
   boardSprite.zIndex = (3.4 + GATE_J + 0.6) * 10 + 3;
   objects.addChild(boardSprite);
   setBoard(zoo.coins);
-  prop('bench', -1.6, 1.4, 1); prop('bench', 1.8, 1.4, 1);
+  prop('d_bench_wood', -1.8, 1.5, 1); prop('d_bench_green', 2.0, 1.5, 1); prop('d_lamp', -1.5, -1.5, 1); prop('d_lamp', 2.5, -1.4, 1); prop('d_bin', 2.6, 0.9, 1);
   prop('tuft', 2.0, 3.0, 1); prop('flowers', -4.1, 5.3, 1); prop('tuft', 4.4, 5.2, 1); prop('pine1', -5.6, 4.8, 1);
 }
 function setBoard(coins) {
@@ -257,6 +257,13 @@ function drawHud() {
   add(textCanvas(font, `+${COIN_PER_VISITOR} PER VISITOR`, 1, '#fff0c8'));
 }
 drawHud();
+function drawVote() {
+  const el = $('vote'), v = zoo.vote;
+  if (!v || v.closed) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  el.innerHTML = `<b>TONIGHT'S VOTE</b><br>${v.options.map((o) => `<div class="opt"><span><b>${o.key}</b> ${o.name}</span><span>${o.price}c · ${v.counts[o.key] || 0}</span></div>`).join('')}<div class="hint">Comment a keyword on our post. Coins are shared by all visitors.</div>`;
+}
+drawVote();
 
 function msg(t) { const m = $('msg'); m.textContent = t || ''; m.style.display = t ? 'block' : 'none'; if (t) setTimeout(() => { if (m.textContent === t) m.style.display = 'none'; }, 4000); }
 async function visitorAt(k) {
