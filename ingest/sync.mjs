@@ -10,6 +10,8 @@ if (!process.env.IG_ACCESS_TOKEN) { console.log('IG_ACCESS_TOKEN není nastaven,
 const ig = new Instagram({ token: process.env.IG_ACCESS_TOKEN, userId: process.env.IG_USER_ID });
 const DRY = !!process.env.DRY_RUN;
 const state = loadState();
+const snap = () => JSON.stringify({ ...state, updated: 0, _index: 0 });      // otisk stavu bez časového razítka: smyčka nezapisuje commity, když se nic nezměnilo
+const before = snap();
 
 const prof = await ig.profile();
 const added = syncFollowers(state, prof.followers_count || 0);
@@ -23,14 +25,20 @@ for (const id of ids) {
   const r = applyComments(state, comments);
   claims += r.claims.length; votes += r.votes.length;
   const t = topComment(comments); if (t && (!best || t.likes > best.likes)) best = { ...t, media: id };
-  if (process.env.IG_REPLY === '1' && !DRY) {
-    for (const c of r.claims.slice(0, 15)) {
-      try { await ig.reply(c.commentId, welcomeReply(c.handle)); } catch (e) { console.log('odpověď selhala:', e.message); }
-    }
+  if (process.env.IG_REPLY === '1') for (const c of r.claims) (state.pendingReplies ||= []).push({ id: c.commentId, h: c.handle, tries: 0 });
+}
+// odpovědi: nové i dřív nepovedené (fronta se uloží, takže se neztratí, když API selže)
+if (process.env.IG_REPLY === '1' && !DRY && state.pendingReplies?.length) {
+  const left = [];
+  for (const p of state.pendingReplies.slice(0, 15)) {
+    try { await ig.reply(p.id, welcomeReply(p.h)); console.log(`odpověď odeslána: @${p.h} (komentář ${p.id})`); }
+    catch (e) { console.log(`odpověď selhala pro @${p.h}: ${e.message}`); if (++p.tries < 5) left.push(p); }
   }
+  state.pendingReplies = [...left, ...state.pendingReplies.slice(15)];
 }
 if (best) state.topComment = best;
 state.followersSeen = prof.followers_count;
-state.updated = new Date().toISOString();
+const changed = snap() !== before;
+if (changed) state.updated = new Date().toISOString();
 console.log(`převzetí jména: ${claims}, hlasů: ${votes}, nejlepší komentář: ${best ? `@${best.username} (${best.likes} lajků)` : 'žádný'}`);
-if (!DRY) { saveState(state); writePublic(state); console.log('uloženo'); }
+if (!DRY && changed) { saveState(state); writePublic(state); console.log('uloženo'); } else console.log(changed ? 'beze změny uloženo nebylo (DRY_RUN)' : 'beze změny');

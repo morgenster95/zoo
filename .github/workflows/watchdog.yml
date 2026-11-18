@@ -1,0 +1,29 @@
+# Hlídač (každých 20 min): běží smyčka zoo-loop? Když ne, spustí ji a založí issue (přijde e-mail). Plánovač GitHubu umí zpozdit, je to záloha.
+name: watchdog
+on:
+  schedule: [{ cron: '*/20 * * * *' }]
+  workflow_dispatch:
+permissions: { contents: read, actions: write, issues: write }
+concurrency: { group: watchdog, cancel-in-progress: true }
+jobs:
+  watch:
+    if: ${{ vars.IG_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check
+        run: |
+          running=$(gh run list --workflow zoo-loop --json status -q '[.[] | select(.status=="in_progress" or .status=="queued")] | length')
+          if [ "$running" = "0" ]; then
+            echo "smyčka neběží → spouštím"
+            gh workflow run zoo-loop
+            if [ -z "$(gh issue list --label loop-down --state open --json number -q '.[0].number')" ]; then
+              gh label create loop-down --color B60205 2>/dev/null || true
+              printf 'Hlídač našel smyčku zoo-loop zastavenou a spustil ji znovu. Pokud se to opakuje, podívej se do logu posledního běhu.\n\nIssue se zavře samo, až smyčka poběží.\n' | gh issue create --title "Smyčka neběžela" --label loop-down --body-file - || true
+            fi
+          else
+            for n in $(gh issue list --label loop-down --state open --json number -q '.[].number'); do gh issue close "$n" -c "Smyčka běží."; done
+          fi

@@ -1,11 +1,10 @@
-# Synchronizace s Instagramem (followeři → návštěvníci, komentáře → jména a hlasy). Zapne se, až v repu nastavíš:
+# Jednorázová (ruční) synchronizace s Instagramem; pravidelně ji dělá smyčka zoo-loop (cron tu GitHub nespouštěl) (followeři → návštěvníci, komentáře → jména a hlasy). Zapne se, až v repu nastavíš:
 #   Variables: IG_ENABLED=true, IG_MEDIA_IDS (ID připnutých příspěvků), volitelně IG_REPLY=1
 #   Secrets:   IG_ACCESS_TOKEN, IG_USER_ID  (návod: docs/INSTAGRAM.md)
 # Stav hry je v data/state.json (commit botem). Nasazení webu navazuje (viz deploy.yml; push botem sám nespouští workflow, proto deploy běží i tady).
 name: sync
 on:
   workflow_dispatch:
-  schedule: [{ cron: '*/10 * * * *' }]
 concurrency: { group: sync, cancel-in-progress: false }
 permissions: { contents: write }
 jobs:

@@ -1,0 +1,34 @@
+# Nepřetržitá smyčka (nezávislá na plánovači GitHubu, který cron spouští nespolehlivě; stejný princip jako ve frontě):
+# každých 5 min followeři a komentáře z IG → stav hry + uvítací odpovědi. Běží max. ~5,5 h, pak spustí sama sebe znovu.
+# Spuštění: Actions → zoo-loop → Run workflow (stačí jednou; hlídač watchdog ji oživí, kdyby spadla).
+name: zoo-loop
+on:
+  workflow_dispatch:
+  schedule: [{ cron: '23 */3 * * *' }]
+concurrency: { group: zoo-loop, cancel-in-progress: false }
+permissions: { contents: write, actions: write, issues: write }
+jobs:
+  loop:
+    if: ${{ vars.IG_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+      IG_USER_ID: ${{ secrets.IG_USER_ID }}
+      IG_MEDIA_IDS: ${{ vars.IG_MEDIA_IDS }}
+      IG_REPLY: ${{ vars.IG_REPLY }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm test
+      - name: Loop
+        run: |
+          git config user.name "zoo-bot"
+          git config user.email "zoo-bot@users.noreply.github.com"
+          bash tools/loop.sh
+      - name: Restart loop
+        if: always()
+        run: gh workflow run zoo-loop --repo "$GITHUB_REPOSITORY"
