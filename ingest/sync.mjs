@@ -3,7 +3,7 @@
 //            IG_REPLY=1 (veřejně odpovědět novým návštěvníkům), DRY_RUN=1 (nic neukládat a neposílat)
 import fs from 'node:fs';
 import { Instagram } from './instagram.mjs';
-import { syncFollowers, applyComments, topComment } from '../engine/ingest.js';
+import { syncFollowers, applyComments, topComment, welcomeReply } from '../engine/ingest.js';
 import { loadState, saveState, writePublic } from '../tools/lib.mjs';
 
 if (!process.env.IG_ACCESS_TOKEN) { console.log('IG_ACCESS_TOKEN není nastaven, nic se nedělá (viz docs/INSTAGRAM.md).'); process.exit(0); }
@@ -25,7 +25,7 @@ for (const id of ids) {
   const t = topComment(comments); if (t && (!best || t.likes > best.likes)) best = { ...t, media: id };
   if (process.env.IG_REPLY === '1' && !DRY) {
     for (const c of r.claims.slice(0, 15)) {
-      try { await ig.reply(c.commentId, `Welcome, @${c.handle}! Your visitor just walked into the zoo 🦩`); } catch (e) { console.log('odpověď selhala:', e.message); }
+      try { await ig.reply(c.commentId, welcomeReply(c.handle)); } catch (e) { console.log('odpověď selhala:', e.message); }
     }
   }
 }

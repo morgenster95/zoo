@@ -200,3 +200,11 @@ test('nejlépe hodnocený komentář vyhrává; při shodě nejstarší', () => 
   const t = topComment([{ id: 'a', username: 'x', text: 'one', like_count: 5, timestamp: '2026-11-18T11:00' }, { id: 'b', username: 'y', text: 'two', like_count: 9, timestamp: '2026-11-18T12:00' }, { id: 'c', username: 'z', text: 'three', like_count: 9, timestamp: '2026-11-18T09:00' }, { id: 'd', username: 'q', text: 'reply', like_count: 99, parent_id: 'a' }]);
   assert.equal(t.id, 'c'); assert.equal(t.likes, 9);
 });
+
+import { welcomeReply } from './ingest.js';
+test('uvítací odpověď: vždy obsahuje @jméno, je krátká a střídá se', () => {
+  const set = new Set();
+  for (const h of ['anna', 'bob', 'cyril', 'dana', 'eva', 'filip', 'gita', 'hugo']) { const t = welcomeReply(h); assert.ok(t.includes('@' + h) && t.length < 100); set.add(t.replace(h, '')); }
+  assert.ok(set.size >= 3);
+  assert.equal(welcomeReply('anna'), welcomeReply('anna'));
+});

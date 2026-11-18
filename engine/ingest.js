@@ -5,6 +5,7 @@
 //  - otevřená otázka (jako ve vzoru): vyhrává komentář s nejvíc lajky (`topComment`)
 import { addVisitor, normHandle, lookOf } from './state.js';
 import { castVote } from './vote.js';
+import { hashString } from './rng.js';
 
 const CLAIM_RE = /\b(zoo|visit)\b/i;
 export const anonName = (n) => 'visitor.' + String(n).padStart(5, '0');
@@ -67,3 +68,12 @@ export function applyComments(state, comments) {
   if (state.seen.length > 4000) state.seen = state.seen.slice(-3000);
   return out;
 }
+
+const WELCOME = [
+  (h) => `Welcome, @${h}! 🦩 Your visitor just walked through the gate.`,
+  (h) => `@${h} is in! 🦙 Look for your little visitor on the map soon.`,
+  (h) => `Ticket punched, @${h}! 🎟️ Enjoy the zoo.`,
+  (h) => `A new visitor arrives: @${h}! 🦩 +10 coins for the zoo.`,
+];
+/** veřejná odpověď novému návštěvníkovi; střídá se 4 věty (podle jména), ať to nevypadá jako spam */
+export const welcomeReply = (handle) => WELCOME[hashString('w' + handle) % WELCOME.length](handle);
