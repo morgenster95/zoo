@@ -2,8 +2,14 @@
   {
     "id": "acquisition-director",
     "type": "reel",
-    "files": ["acquisition_director.mp4"],
+    "files": [
+      "acquisition_director.mp4"
+    ],
     "caption": "8 followers away from LIONS 🦁 (and one very sad director)\nEvery follower = a visitor = 10 coins. Comment ZOO and your name walks in. 👇",
-    "published": null
+    "published": {
+      "id": "18097006757163611",
+      "permalink": "https://www.instagram.com/reel/Df5HffuiLRK/",
+      "at": "2026-11-18T18:10:36.664Z"
+    }
   }
 ]
