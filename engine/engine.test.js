@@ -166,3 +166,37 @@ test('parcela bez obsahu je volná louka; plot má cedulku', () => {
   assert.equal(placeLot(0, 0, undefined, '0,0').free, true);
   assert.ok(placeLot(0, 0, { t: 'plot', id: 1 }, '0,0').items.some((x) => x.role === 'sign'));
 });
+
+import { syncFollowers, claimName, topComment, applyComments, anonName } from './ingest.js';
+
+test('follower = anonymní návštěvník, počet nikdy neklesá', () => {
+  const s = emptyState();
+  assert.equal(syncFollowers(s, 5), 5);
+  assert.equal(s.visitors[0].h, anonName(1)); assert.equal(s.visitors[0].a, 1);
+  assert.equal(syncFollowers(s, 3), 0);                       // unfollow nic neubere
+  assert.equal(s.visitors.length, 5);
+  assert.equal(syncFollowers(s, 8), 3);
+  assert.equal(balance(s), 500 + 80);
+});
+
+test('komentář se slovem ZOO převezme jméno prvního anonymního návštěvníka', () => {
+  const s = emptyState(); syncFollowers(s, 3);
+  const r = claimName(s, 'Jane.Doe', 'ZOO! count me in');
+  assert.equal(r.handle, 'jane.doe'); assert.equal(r.renamed, true);
+  assert.equal(s.visitors.length, 3); assert.equal(s.visitors[0].h, 'jane.doe'); assert.ok(!s.visitors[0].a);
+  assert.equal(claimName(s, 'jane.doe', 'zoo').existing, true);       // podruhé nic
+  assert.equal(claimName(s, 'bob', 'nice video'), null);               // bez klíčového slova nic
+});
+
+test('komentáře se zpracují jednou; odpovědi se přeskočí; hlasuje jen návštěvník', () => {
+  const s = emptyState(); syncFollowers(s, 2);
+  const { openVote } = { openVote: null };
+  const cs = [{ id: '1', username: 'amy', text: 'zoo', timestamp: '2026-11-18T10:00:00' }, { id: '2', username: 'amy', text: 'zoo', parent_id: '1', timestamp: '2026-11-18T10:01:00' }];
+  const a = applyComments(s, cs), b = applyComments(s, cs);
+  assert.equal(a.claims.length, 1); assert.equal(a.skipped, 1); assert.equal(b.claims.length, 0);
+});
+
+test('nejlépe hodnocený komentář vyhrává; při shodě nejstarší', () => {
+  const t = topComment([{ id: 'a', username: 'x', text: 'one', like_count: 5, timestamp: '2026-11-18T11:00' }, { id: 'b', username: 'y', text: 'two', like_count: 9, timestamp: '2026-11-18T12:00' }, { id: 'c', username: 'z', text: 'three', like_count: 9, timestamp: '2026-11-18T09:00' }, { id: 'd', username: 'q', text: 'reply', like_count: 99, parent_id: 'a' }]);
+  assert.equal(t.id, 'c'); assert.equal(t.likes, 9);
+});

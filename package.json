@@ -11,7 +11,7 @@
     "assets": "python3 art/proto/export_assets.py",
     "data:fake": "node tools/fake-roster.mjs 4000",
     "data:build": "node tools/build-data.mjs",
-    "test": "node --test engine/engine.test.js"
+    "test": "node --test engine/engine.test.js ingest/instagram.test.mjs"
   },
   "dependencies": {
     "pixi.js": "^8.6.0"
